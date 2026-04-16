@@ -52,8 +52,7 @@ describe('App', () => {
     // The cover hero hides the name list until something is selected. Seed
     // the store instead of the URL — useFilterUrlSync writes store → URL on
     // mount, which would wipe any replaceState we did here.
-    const achillesId = '019c8a34-3f3a-7005-b2be-2b9d662a9294';
-    useFilterStore.setState({ selectedNameId: achillesId });
+    useFilterStore.setState({ selectedNameTitle: 'Achilles' });
 
     render(<App />);
 

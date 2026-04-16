@@ -4,49 +4,47 @@ import { Helmet } from 'react-helmet-async';
 
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
-import { useNames } from '../api/get-names';
 import { useRelatedNames } from '../hooks/use-related-names';
+import { useSelectedName } from '../hooks/use-selected-name';
 import { useFilterStore } from '../stores/filter-store';
 
 import { ShareActions } from './share-actions';
 
-function restoreFocusToListItem(id: string) {
+function restoreFocusToListItem(title: string) {
   queueMicrotask(() => {
-    const selector = `[data-name-id="${CSS.escape(id)}"]`;
+    const selector = `[data-name-title="${CSS.escape(title)}"]`;
     const target = document.querySelector(selector);
     (target as HTMLElement | null)?.focus();
   });
 }
 
 export function NameDetail() {
-  const selectedNameId = useFilterStore((s) => s.selectedNameId);
-  const setSelectedNameId = useFilterStore((s) => s.setSelectedNameId);
-  const { data: names } = useNames();
-  const related = useRelatedNames(names ?? [], 3);
+  const current = useSelectedName();
+  const setSelectedNameTitle = useFilterStore((s) => s.setSelectedNameTitle);
+  const related = useRelatedNames(3);
   const reduce = useReducedMotion();
 
-  // Callback ref: a useEffect keyed on id would fire before the names query
+  // Callback ref: a useEffect keyed on title would fire before the names query
   // resolves, when the h2 isn't yet in the tree.
   const focusHeadingOnMount = useCallback((node: HTMLHeadingElement | null) => {
     if (node) node.focus();
   }, []);
 
+  const currentTitle = current?.title ?? null;
+
   useEffect(() => {
-    if (!selectedNameId) return;
-    const previousId = selectedNameId;
+    if (!currentTitle) return;
+    const previousTitle = currentTitle;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
-      setSelectedNameId(null);
-      restoreFocusToListItem(previousId);
+      setSelectedNameTitle(null);
+      restoreFocusToListItem(previousTitle);
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [selectedNameId, setSelectedNameId]);
+  }, [currentTitle, setSelectedNameTitle]);
 
-  if (!selectedNameId) return null;
-
-  const current = names?.find((n) => n.id === selectedNameId);
   if (!current) return null;
 
   const transition = reduce

@@ -64,7 +64,7 @@ describe('NameDetail', () => {
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
     );
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
@@ -78,7 +78,7 @@ describe('NameDetail', () => {
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
     );
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
@@ -93,7 +93,7 @@ describe('NameDetail', () => {
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
     );
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
@@ -107,7 +107,7 @@ describe('NameDetail', () => {
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
     );
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
@@ -122,11 +122,11 @@ describe('NameDetail', () => {
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
     );
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     // Stand-in list-item for the focus-restore query to find.
     const stubItem = document.createElement('button');
-    stubItem.setAttribute('data-name-id', 'andromeda-id');
+    stubItem.setAttribute('data-name-title', 'Andromeda');
     stubItem.textContent = 'Andromeda';
     document.body.appendChild(stubItem);
 
@@ -137,7 +137,7 @@ describe('NameDetail', () => {
 
     await userEvent.keyboard('{Escape}');
 
-    expect(useFilterStore.getState().selectedNameId).toBeNull();
+    expect(useFilterStore.getState().selectedNameTitle).toBeNull();
     await waitFor(() => expect(stubItem).toHaveFocus());
 
     stubItem.remove();

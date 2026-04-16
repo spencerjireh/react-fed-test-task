@@ -13,8 +13,8 @@ import { useFilterStore } from '../stores/filter-store';
 import { ChevronPair } from './chevron-pair';
 import { NameListItem } from './name-list-item';
 
-function focusById(id: string) {
-  const selector = `[data-name-id="${CSS.escape(id)}"]`;
+function focusByTitle(title: string) {
+  const selector = `[data-name-title="${CSS.escape(title)}"]`;
   const el = document.querySelector(selector);
   (el as HTMLElement | null)?.focus();
 }
@@ -23,8 +23,8 @@ export function NameList() {
   const { data: names, isPending, isError } = useNames();
   const filtered = useFilteredNames(names ?? []);
 
-  const selectedNameId = useFilterStore((s) => s.selectedNameId);
-  const setSelectedNameId = useFilterStore((s) => s.setSelectedNameId);
+  const selectedNameTitle = useFilterStore((s) => s.selectedNameTitle);
+  const setSelectedNameTitle = useFilterStore((s) => s.setSelectedNameTitle);
   const page = useFilterStore((s) => s.page);
   const setPage = useFilterStore((s) => s.setPage);
 
@@ -68,9 +68,9 @@ export function NameList() {
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
     const focused = document.activeElement as HTMLElement | null;
-    const currentId = focused?.getAttribute('data-name-id');
-    const currentIndex = currentId
-      ? filtered.findIndex((n) => n.id === currentId)
+    const currentTitle = focused?.getAttribute('data-name-title');
+    const currentIndex = currentTitle
+      ? filtered.findIndex((n) => n.title === currentTitle)
       : -1;
     if (currentIndex === -1) return;
 
@@ -79,10 +79,10 @@ export function NameList() {
     if (nextIndex < 0 || nextIndex >= filtered.length) return;
 
     event.preventDefault();
-    const nextId = filtered[nextIndex].id;
+    const nextTitle = filtered[nextIndex].title;
     virtuosoRef.current?.scrollIntoView({
       index: nextIndex,
-      done: () => focusById(nextId),
+      done: () => focusByTitle(nextTitle),
     });
   };
 
@@ -106,8 +106,8 @@ export function NameList() {
         itemContent={(_, name) => (
           <NameListItem
             name={name}
-            isSelected={name.id === selectedNameId}
-            onSelect={setSelectedNameId}
+            isSelected={name.title === selectedNameTitle}
+            onSelect={setSelectedNameTitle}
           />
         )}
       />

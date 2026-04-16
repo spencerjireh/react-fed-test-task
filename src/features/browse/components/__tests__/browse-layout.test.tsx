@@ -70,7 +70,7 @@ describe('BrowseLayout', () => {
       letter: null,
       macroCategories: new Set(),
       rawCategories: new Set(),
-      selectedNameId: null,
+      selectedNameTitle: null,
       page: 0,
     });
     server.use(
@@ -90,7 +90,7 @@ describe('BrowseLayout', () => {
 
   it('renders the master-detail pane when a name is selected', async () => {
     stubMatchMedia(true);
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<BrowseLayout />);
 
@@ -112,7 +112,7 @@ describe('BrowseLayout', () => {
 
   it('renders the detail inside a dialog on mobile', async () => {
     stubMatchMedia(false);
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<BrowseLayout />);
 
@@ -122,7 +122,7 @@ describe('BrowseLayout', () => {
 
   it('does not render a dialog on desktop', async () => {
     stubMatchMedia(true);
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<BrowseLayout />);
 

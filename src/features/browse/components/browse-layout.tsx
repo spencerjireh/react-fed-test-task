@@ -6,7 +6,7 @@ import { Head } from '@/components/seo/head';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
-import { useFilterStore } from '../stores/filter-store';
+import { useSelectedName } from '../hooks/use-selected-name';
 import { useFilterUrlSync } from '../stores/use-filter-url-sync';
 
 import { CoverHero } from './cover-hero';
@@ -19,7 +19,7 @@ import { NameList } from './name-list';
 
 export function BrowseLayout() {
   useFilterUrlSync();
-  const selectedNameId = useFilterStore((s) => s.selectedNameId);
+  const selected = useSelectedName();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const reduce = useReducedMotion();
 
@@ -47,7 +47,7 @@ export function BrowseLayout() {
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {selectedNameId === null ? (
+          {selected === null ? (
             <motion.div
               key="cover"
               initial={{ opacity: 0 }}

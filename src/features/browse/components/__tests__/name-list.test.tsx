@@ -90,7 +90,7 @@ describe('NameList', () => {
       letter: null,
       macroCategories: new Set(),
       rawCategories: new Set(),
-      selectedNameId: null,
+      selectedNameTitle: null,
       page: 0,
     });
     server.use(
@@ -113,9 +113,9 @@ describe('NameList', () => {
     const first = await screen.findByRole('button', { name: 'A00' });
     await userEvent.click(first);
 
-    expect(useFilterStore.getState().selectedNameId).toBe('name-0');
+    expect(useFilterStore.getState().selectedNameTitle).toBe('A00');
     await waitFor(() => {
-      expect(screen.getByTestId('location')).toHaveTextContent('n=name-0');
+      expect(screen.getByTestId('location')).toHaveTextContent('n=A00');
     });
   });
 
@@ -197,6 +197,6 @@ describe('NameList', () => {
     first.focus();
     await userEvent.keyboard('{Enter}');
 
-    expect(useFilterStore.getState().selectedNameId).toBe('name-0');
+    expect(useFilterStore.getState().selectedNameTitle).toBe('A00');
   });
 });

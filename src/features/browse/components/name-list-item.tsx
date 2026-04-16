@@ -7,7 +7,7 @@ import type { Name } from '../types';
 interface NameListItemProps {
   name: Name;
   isSelected: boolean;
-  onSelect: (id: string) => void;
+  onSelect: (title: string) => void;
   ref?: Ref<HTMLButtonElement>;
 }
 
@@ -22,8 +22,8 @@ export function NameListItem({
       ref={ref}
       type="button"
       aria-pressed={isSelected}
-      data-name-id={name.id}
-      onClick={() => onSelect(name.id)}
+      data-name-title={name.title}
+      onClick={() => onSelect(name.title)}
       className={cn(
         'block w-full text-left font-heading transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main',

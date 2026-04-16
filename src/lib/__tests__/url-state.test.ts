@@ -17,7 +17,7 @@ describe('encodeFilterUrlParams', () => {
       letter: 'A',
       macroCategories: ['Famous', 'Funny'],
       rawCategories: ['raw-1', 'raw-2'],
-      selectedNameId: 'name-42',
+      selectedNameTitle: 'name-42',
       page: 3,
     });
     const params = new URLSearchParams(encoded);
@@ -48,7 +48,7 @@ describe('encodeFilterUrlParams', () => {
       encodeFilterUrlParams({
         gender: '',
         letter: undefined,
-        selectedNameId: '',
+        selectedNameTitle: '',
       }),
     ).toBe('');
   });
@@ -72,7 +72,7 @@ describe('decodeFilterUrlParams', () => {
       letter: 'C',
       macroCategories: ['Famous', 'Joyful'],
       rawCategories: ['abc', 'def'],
-      selectedNameId: 'name-1',
+      selectedNameTitle: 'name-1',
       page: 5,
     });
   });
@@ -123,10 +123,32 @@ describe('round-trip', () => {
       letter: 'Ñ',
       macroCategories: ['Famous', "Pet's size"],
       rawCategories: ['019c8a34-3585-7249-b7c2-a4f85945291e'],
-      selectedNameId: '019c8a34-3f34-70c8-8f5e-3657bb9b328b',
+      selectedNameTitle: 'Aaron',
       page: 7,
     };
     expect(decodeFilterUrlParams(encodeFilterUrlParams(input))).toEqual(input);
+  });
+
+  it('round-trips a title with a space', () => {
+    const encoded = encodeFilterUrlParams({
+      selectedNameTitle: 'Captain Hook',
+    });
+    expect(decodeFilterUrlParams(encoded).selectedNameTitle).toBe(
+      'Captain Hook',
+    );
+  });
+
+  it('round-trips a title with a non-ASCII accent', () => {
+    const encoded = encodeFilterUrlParams({ selectedNameTitle: 'Xiáng' });
+    // URL-encoded bytes, but decode-symmetric with the input.
+    expect(encoded).toContain('%C3%A1');
+    expect(decodeFilterUrlParams(encoded).selectedNameTitle).toBe('Xiáng');
+  });
+
+  it('decodes a title written with %20 instead of + for spaces', () => {
+    expect(decodeFilterUrlParams('n=Captain%20Hook').selectedNameTitle).toBe(
+      'Captain Hook',
+    );
   });
 });
 

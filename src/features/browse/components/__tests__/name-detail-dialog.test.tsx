@@ -32,7 +32,7 @@ describe('NameDetailDialog', () => {
       letter: null,
       macroCategories: new Set(),
       rawCategories: new Set(),
-      selectedNameId: null,
+      selectedNameTitle: null,
       page: 0,
     });
     server.use(
@@ -46,7 +46,7 @@ describe('NameDetailDialog', () => {
   });
 
   it('opens as a dialog containing the selected name heading', async () => {
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
     renderApp(<NameDetailDialog />);
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
@@ -56,13 +56,13 @@ describe('NameDetailDialog', () => {
   });
 
   it('Escape closes the dialog, clears the selection, and restores focus', async () => {
-    // Stub list-item the focus-restore handler will seek out by data-name-id.
+    // Stub list-item the focus-restore handler will seek out by data-name-title.
     const stubItem = document.createElement('button');
-    stubItem.setAttribute('data-name-id', 'andromeda-id');
+    stubItem.setAttribute('data-name-title', 'Andromeda');
     stubItem.textContent = 'Andromeda';
     document.body.appendChild(stubItem);
 
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
     renderApp(<NameDetailDialog />);
 
     await screen.findByRole('dialog');
@@ -71,7 +71,7 @@ describe('NameDetailDialog', () => {
     await userEvent.keyboard('{Escape}');
 
     await waitFor(() => {
-      expect(useFilterStore.getState().selectedNameId).toBeNull();
+      expect(useFilterStore.getState().selectedNameTitle).toBeNull();
     });
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -81,13 +81,13 @@ describe('NameDetailDialog', () => {
     stubItem.remove();
   });
 
-  it('unmounts the dialog when selectedNameId is cleared externally', async () => {
-    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+  it('unmounts the dialog when selectedNameTitle is cleared externally', async () => {
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
     renderApp(<NameDetailDialog />);
 
     await screen.findByRole('dialog');
 
-    useFilterStore.setState({ selectedNameId: null });
+    useFilterStore.setState({ selectedNameTitle: null });
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

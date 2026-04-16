@@ -7,26 +7,26 @@ import { useFilterStore } from '../stores/filter-store';
 
 import { NameDetail } from './name-detail';
 
-function restoreFocusToListItem(id: string) {
+function restoreFocusToListItem(title: string) {
   queueMicrotask(() => {
-    const selector = `[data-name-id="${CSS.escape(id)}"]`;
+    const selector = `[data-name-title="${CSS.escape(title)}"]`;
     const target = document.querySelector(selector);
     (target as HTMLElement | null)?.focus();
   });
 }
 
 export function NameDetailDialog() {
-  const selectedNameId = useFilterStore((s) => s.selectedNameId);
-  const setSelectedNameId = useFilterStore((s) => s.setSelectedNameId);
+  const selectedNameTitle = useFilterStore((s) => s.selectedNameTitle);
+  const setSelectedNameTitle = useFilterStore((s) => s.setSelectedNameTitle);
   const reduce = useReducedMotion();
 
-  const open = selectedNameId !== null;
+  const open = selectedNameTitle !== null;
 
   const handleOpenChange = (next: boolean) => {
     if (next) return;
-    const previousId = selectedNameId;
-    setSelectedNameId(null);
-    if (previousId) restoreFocusToListItem(previousId);
+    const previousTitle = selectedNameTitle;
+    setSelectedNameTitle(null);
+    if (previousTitle) restoreFocusToListItem(previousTitle);
   };
 
   const sheetTransition = reduce

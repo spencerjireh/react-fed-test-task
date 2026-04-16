@@ -3,7 +3,7 @@ export interface FilterUrlParams {
   letter?: string;
   macroCategories?: string[];
   rawCategories?: string[];
-  selectedNameId?: string;
+  selectedNameTitle?: string;
   page?: number;
 }
 
@@ -13,7 +13,7 @@ const KEYS = {
   letter: 'l',
   macroCategories: 'mc',
   rawCategories: 'rc',
-  selectedNameId: 'n',
+  selectedNameTitle: 'n',
   page: 'p',
 } as const;
 
@@ -31,8 +31,8 @@ export function encodeFilterUrlParams(params: FilterUrlParams): string {
   if (params.rawCategories && params.rawCategories.length > 0) {
     search.set(KEYS.rawCategories, params.rawCategories.join(','));
   }
-  if (params.selectedNameId)
-    search.set(KEYS.selectedNameId, params.selectedNameId);
+  if (params.selectedNameTitle)
+    search.set(KEYS.selectedNameTitle, params.selectedNameTitle);
   if (params.page !== undefined && params.page > 0) {
     search.set(KEYS.page, String(params.page));
   }
@@ -65,8 +65,8 @@ export function decodeFilterUrlParams(
     if (tokens.length > 0) result.rawCategories = tokens;
   }
 
-  const n = search.get(KEYS.selectedNameId);
-  if (n) result.selectedNameId = n;
+  const n = search.get(KEYS.selectedNameTitle);
+  if (n) result.selectedNameTitle = n;
 
   const p = search.get(KEYS.page);
   if (p !== null) {

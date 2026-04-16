@@ -67,7 +67,7 @@ describe('useFilteredNames', () => {
     const { result, rerender } = renderHook(() => useFilteredNames(names));
     const first = result.current;
 
-    act(() => useFilterStore.getState().setSelectedNameId('a'));
+    act(() => useFilterStore.getState().setSelectedNameTitle('a'));
     act(() => useFilterStore.getState().setPage(3));
     rerender();
 

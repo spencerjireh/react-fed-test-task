@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useFilterStore } from '../../stores/filter-store';
 import type { Name } from '../../types';
@@ -25,33 +25,37 @@ const noOverlap = buildName('zero', 'Zebra', ['z']);
 
 const names = [current, twoOverlap, oneOverlap, noOverlap];
 
+vi.mock('../../api/get-names', () => ({
+  useNames: () => ({ data: names }),
+}));
+
 beforeEach(() => {
   window.history.replaceState({}, '', '/');
 });
 
 describe('useRelatedNames', () => {
   it('returns [] when no name is selected', () => {
-    const { result } = renderHook(() => useRelatedNames(names));
+    const { result } = renderHook(() => useRelatedNames());
     expect(result.current).toEqual([]);
   });
 
   it('returns top-N related when a name is selected', () => {
-    const { result } = renderHook(() => useRelatedNames(names));
-    act(() => useFilterStore.getState().setSelectedNameId('current'));
+    const { result } = renderHook(() => useRelatedNames());
+    act(() => useFilterStore.getState().setSelectedNameTitle('Andromeda'));
     expect(result.current.map((n) => n.id)).toEqual(['two', 'one']);
   });
 
-  it('updates when selectedNameId changes', () => {
-    const { result } = renderHook(() => useRelatedNames(names));
-    act(() => useFilterStore.getState().setSelectedNameId('current'));
+  it('updates when selectedNameTitle changes', () => {
+    const { result } = renderHook(() => useRelatedNames());
+    act(() => useFilterStore.getState().setSelectedNameTitle('Andromeda'));
     const first = result.current;
-    act(() => useFilterStore.getState().setSelectedNameId('two'));
+    act(() => useFilterStore.getState().setSelectedNameTitle('Astro'));
     expect(result.current).not.toBe(first);
   });
 
   it('keeps reference stable when unrelated store slices change', () => {
-    const { result, rerender } = renderHook(() => useRelatedNames(names));
-    act(() => useFilterStore.getState().setSelectedNameId('current'));
+    const { result, rerender } = renderHook(() => useRelatedNames());
+    act(() => useFilterStore.getState().setSelectedNameTitle('Andromeda'));
     const first = result.current;
     act(() => useFilterStore.getState().setPage(5));
     act(() => useFilterStore.getState().setGender('F'));
@@ -60,9 +64,15 @@ describe('useRelatedNames', () => {
   });
 
   it('respects the limit parameter', () => {
-    const { result } = renderHook(() => useRelatedNames(names, 1));
-    act(() => useFilterStore.getState().setSelectedNameId('current'));
+    const { result } = renderHook(() => useRelatedNames(1));
+    act(() => useFilterStore.getState().setSelectedNameTitle('Andromeda'));
     expect(result.current).toHaveLength(1);
     expect(result.current[0].id).toBe('two');
+  });
+
+  it('returns [] when the selected title matches no name', () => {
+    const { result } = renderHook(() => useRelatedNames());
+    act(() => useFilterStore.getState().setSelectedNameTitle('NoSuchName'));
+    expect(result.current).toEqual([]);
   });
 });

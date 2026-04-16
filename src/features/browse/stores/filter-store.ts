@@ -16,7 +16,7 @@ export interface FilterState {
   letter: Letter | null;
   macroCategories: Set<MacroCategory>;
   rawCategories: Set<string>;
-  selectedNameId: string | null;
+  selectedNameTitle: string | null;
   page: number;
 }
 
@@ -25,7 +25,7 @@ export interface FilterActions {
   setLetter: (letter: Letter | null) => void;
   toggleMacro: (macro: MacroCategory) => void;
   toggleRaw: (rawCategoryId: string) => void;
-  setSelectedNameId: (id: string | null) => void;
+  setSelectedNameTitle: (title: string | null) => void;
   setPage: (page: number) => void;
   clearFilters: () => void;
 }
@@ -61,7 +61,7 @@ const DEFAULT_STATE: FilterState = {
   letter: null,
   macroCategories: new Set(),
   rawCategories: new Set(),
-  selectedNameId: null,
+  selectedNameTitle: null,
   page: 0,
 };
 
@@ -71,7 +71,7 @@ interface PersistedFilterState {
   letter: Letter | null;
   macroCategories: string[];
   rawCategories: string[];
-  selectedNameId: string | null;
+  selectedNameTitle: string | null;
   page: number;
 }
 
@@ -81,7 +81,7 @@ function toPersisted(state: FilterState): PersistedFilterState {
     letter: state.letter,
     macroCategories: [...state.macroCategories],
     rawCategories: [...state.rawCategories],
-    selectedNameId: state.selectedNameId,
+    selectedNameTitle: state.selectedNameTitle,
     page: state.page,
   };
 }
@@ -100,9 +100,9 @@ function fromPersisted(persisted: PersistedFilterState): FilterState {
       (persisted.macroCategories ?? []).filter(isMacroCategory),
     ),
     rawCategories: new Set(persisted.rawCategories ?? []),
-    selectedNameId:
-      typeof persisted.selectedNameId === 'string'
-        ? persisted.selectedNameId
+    selectedNameTitle:
+      typeof persisted.selectedNameTitle === 'string'
+        ? persisted.selectedNameTitle
         : null,
     page:
       Number.isFinite(persisted.page) && persisted.page >= 0
@@ -123,7 +123,7 @@ function fromUrlParams(params: FilterUrlParams): FilterState {
       (params.macroCategories ?? []).filter(isMacroCategory),
     ),
     rawCategories: new Set(params.rawCategories ?? []),
-    selectedNameId: params.selectedNameId ?? null,
+    selectedNameTitle: params.selectedNameTitle ?? null,
     page: typeof params.page === 'number' && params.page >= 0 ? params.page : 0,
   };
 }
@@ -166,7 +166,7 @@ export function serializeFilterStateToUrl(state: FilterState): string {
     rawCategories: state.rawCategories.size
       ? [...state.rawCategories]
       : undefined,
-    selectedNameId: state.selectedNameId ?? undefined,
+    selectedNameTitle: state.selectedNameTitle ?? undefined,
     page: state.page || undefined,
   });
 }
@@ -194,8 +194,8 @@ export const useFilterStore = create<FilterStore>((set) => ({
       return withPersist(s, { rawCategories: next });
     }),
 
-  setSelectedNameId: (selectedNameId) =>
-    set((s) => withPersist(s, { selectedNameId })),
+  setSelectedNameTitle: (selectedNameTitle) =>
+    set((s) => withPersist(s, { selectedNameTitle })),
 
   setPage: (page) => set((s) => withPersist(s, { page })),
 

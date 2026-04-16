@@ -7,7 +7,7 @@ import { BrowseLayout } from './browse-layout';
 
 function Framed({ selectedId }: { selectedId: string | null }) {
   useEffect(() => {
-    useFilterStore.setState({ selectedNameId: selectedId });
+    useFilterStore.setState({ selectedNameTitle: selectedId });
   }, [selectedId]);
   return <BrowseLayout />;
 }
@@ -25,7 +25,7 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * Cover state. Uses the global MSW handlers from `.storybook/preview.tsx`
- * (679 names). With `selectedNameId === null`, the hero replaces the
+ * (679 names). With `selectedNameTitle === null`, the hero replaces the
  * master-detail grid.
  */
 export const CoverState: Story = {
@@ -33,7 +33,7 @@ export const CoverState: Story = {
 };
 
 /**
- * Master-detail state. `selectedNameId` is set so the list and detail
+ * Master-detail state. `selectedNameTitle` is set so the list and detail
  * pane render in place of the hero.
  */
 export const SelectedName: Story = {

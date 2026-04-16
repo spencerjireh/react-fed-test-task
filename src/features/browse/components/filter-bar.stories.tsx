@@ -20,7 +20,7 @@ function Framed({ macros, raws }: FramedProps) {
       letter: null,
       macroCategories: macros,
       rawCategories: raws,
-      selectedNameId: null,
+      selectedNameTitle: null,
       page: 0,
     });
   }, [macros, raws]);

@@ -45,7 +45,7 @@ describe('LetterStrip', () => {
       letter: null,
       macroCategories: new Set(),
       rawCategories: new Set(),
-      selectedNameId: null,
+      selectedNameTitle: null,
       page: 0,
     });
     server.use(

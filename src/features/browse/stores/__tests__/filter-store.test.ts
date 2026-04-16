@@ -24,7 +24,7 @@ describe('computeInitialState', () => {
     expect(state.letter).toBeNull();
     expect(state.macroCategories.size).toBe(0);
     expect(state.rawCategories.size).toBe(0);
-    expect(state.selectedNameId).toBeNull();
+    expect(state.selectedNameTitle).toBeNull();
     expect(state.page).toBe(0);
   });
 
@@ -37,7 +37,7 @@ describe('computeInitialState', () => {
         letter: 'Z',
         macroCategories: ['Joyful'],
         rawCategories: [],
-        selectedNameId: null,
+        selectedNameTitle: null,
         page: 9,
       }),
     );
@@ -56,7 +56,7 @@ describe('computeInitialState', () => {
         letter: 'A',
         macroCategories: ['Famous'],
         rawCategories: ['raw-1'],
-        selectedNameId: 'name-1',
+        selectedNameTitle: 'name-1',
         page: 4,
       }),
     );
@@ -65,7 +65,7 @@ describe('computeInitialState', () => {
     expect(state.letter).toBe('A');
     expect(state.macroCategories).toEqual(new Set(['Famous']));
     expect(state.rawCategories).toEqual(new Set(['raw-1']));
-    expect(state.selectedNameId).toBe('name-1');
+    expect(state.selectedNameTitle).toBe('name-1');
     expect(state.page).toBe(4);
   });
 
@@ -98,9 +98,9 @@ describe('useFilterStore actions', () => {
     expect(useFilterStore.getState().letter).toBe('K');
   });
 
-  it('setSelectedNameId updates the store', () => {
-    act(() => useFilterStore.getState().setSelectedNameId('abc'));
-    expect(useFilterStore.getState().selectedNameId).toBe('abc');
+  it('setSelectedNameTitle updates the store', () => {
+    act(() => useFilterStore.getState().setSelectedNameTitle('abc'));
+    expect(useFilterStore.getState().selectedNameTitle).toBe('abc');
   });
 
   it('setPage updates the store', () => {
@@ -135,13 +135,13 @@ describe('useFilterStore actions', () => {
     expect(after.has('raw-42')).toBe(true);
   });
 
-  it('clearFilters resets all filter slices but preserves selectedNameId', () => {
+  it('clearFilters resets all filter slices but preserves selectedNameTitle', () => {
     act(() => {
       useFilterStore.getState().setGender('M');
       useFilterStore.getState().setLetter('A');
       useFilterStore.getState().toggleMacro('Famous');
       useFilterStore.getState().toggleRaw('raw-1');
-      useFilterStore.getState().setSelectedNameId('name-123');
+      useFilterStore.getState().setSelectedNameTitle('name-123');
       useFilterStore.getState().setPage(3);
     });
 
@@ -153,8 +153,8 @@ describe('useFilterStore actions', () => {
     expect(s.macroCategories.size).toBe(0);
     expect(s.rawCategories.size).toBe(0);
     expect(s.page).toBe(0);
-    // selectedNameId persists so the open detail pane doesn't get dismissed.
-    expect(s.selectedNameId).toBe('name-123');
+    // selectedNameTitle persists so the open detail pane doesn't get dismissed.
+    expect(s.selectedNameTitle).toBe('name-123');
   });
 
   it('mirrors to localStorage on every mutation', () => {
@@ -198,5 +198,19 @@ describe('serializeFilterStateToUrl', () => {
     act(() => useFilterStore.getState().setGender('Both'));
     act(() => useFilterStore.getState().setPage(0));
     expect(serializeFilterStateToUrl(useFilterStore.getState())).toBe('');
+  });
+
+  it('round-trips a title containing a space', () => {
+    act(() => useFilterStore.getState().setSelectedNameTitle('Captain Hook'));
+    const url = serializeFilterStateToUrl(useFilterStore.getState());
+    window.history.replaceState({}, '', `/?${url}`);
+    expect(computeInitialState().selectedNameTitle).toBe('Captain Hook');
+  });
+
+  it('round-trips a title with a non-ASCII accent', () => {
+    act(() => useFilterStore.getState().setSelectedNameTitle('Xiáng'));
+    const url = serializeFilterStateToUrl(useFilterStore.getState());
+    window.history.replaceState({}, '', `/?${url}`);
+    expect(computeInitialState().selectedNameTitle).toBe('Xiáng');
   });
 });

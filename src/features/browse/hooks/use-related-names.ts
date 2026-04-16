@@ -1,14 +1,17 @@
 import { useMemo } from 'react';
 
-import { useFilterStore } from '../stores/filter-store';
+import { useNames } from '../api/get-names';
 import type { Name } from '../types';
 import { relatedNames } from '../utils/related';
 
-export function useRelatedNames(names: Name[], limit = 3): Name[] {
-  const selectedNameId = useFilterStore((s) => s.selectedNameId);
+import { useSelectedName } from './use-selected-name';
+
+export function useRelatedNames(limit = 3): Name[] {
+  const { data: names } = useNames();
+  const current = useSelectedName();
 
   return useMemo(() => {
-    if (!selectedNameId) return [];
-    return relatedNames(names, selectedNameId, limit);
-  }, [names, selectedNameId, limit]);
+    if (!current || !names) return [];
+    return relatedNames(names, current.id, limit);
+  }, [names, current, limit]);
 }

@@ -33,7 +33,7 @@ const FIXTURE: RawName[] = [
 
 function Framed({ selectedId }: { selectedId: string | null }) {
   useEffect(() => {
-    useFilterStore.setState({ selectedNameId: selectedId });
+    useFilterStore.setState({ selectedNameTitle: selectedId });
   }, [selectedId]);
   return (
     <div className="max-w-screen-sm bg-cream-light p-6">

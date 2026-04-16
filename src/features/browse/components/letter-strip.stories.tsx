@@ -25,7 +25,7 @@ function Framed({ initialLetter }: { initialLetter: Letter | null }) {
       letter: initialLetter,
       macroCategories: new Set(),
       rawCategories: new Set(),
-      selectedNameId: null,
+      selectedNameTitle: null,
       page: 0,
     });
   }, [initialLetter]);

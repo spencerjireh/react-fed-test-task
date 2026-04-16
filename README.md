@@ -26,6 +26,7 @@ A single-page app for browsing 679 pet names. Filter by gender, letter, or categ
 ## Setup
 
 ```bash
+cp .env.example .env     # flips on MSW for local dev
 npm install
 npm run dev              # http://localhost:3000
 npm run e2e:install      # one-time: download Chromium for Playwright
@@ -110,7 +111,7 @@ A few calls made because the task brief or provided data didn't settle them outr
 
 - **Macro-category mapping.** The brief gives 7 top-level dropdowns and 25 raw categories but no mapping between them. `macro-category-map.ts` is a best semantic guess; anything unmapped falls through to "Others".
 - **Ñ in the letter strip.** Figma shows Ñ between N and O. `letters.json` doesn't include it, and the dataset has zero Ñ-initial names, so the API wins and Ñ is dropped.
-- **Dog photos.** Cover and Results both use the Figma references (Getty stock). Swap for CC-0 assets before any public deploy.
+- **A Results view between Cover and Detail.** The brief only shows Cover and Detail, but filtering from the cover hands the user a list before they pick a name; this middle state is why `?l=A&g=M` without `n=` renders a full-pane list rather than auto-selecting.
 
 ## Out of scope
 

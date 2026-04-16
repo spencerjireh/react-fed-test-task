@@ -27,7 +27,6 @@ export function NameListItem({
     <button
       ref={ref}
       type="button"
-      aria-pressed={isSelected}
       data-name-title={name.title}
       onClick={() => onSelect(name.title)}
       className={cn(

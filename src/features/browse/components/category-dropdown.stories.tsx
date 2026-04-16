@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
-import { useEffect } from 'react';
 
 import { useFilterStore } from '../stores/filter-store';
 import type { MacroCategory, RawCategory } from '../types';
@@ -23,34 +22,19 @@ const FAMOUS_RAWS: RawCategory[] = [
   { id: MUSICAL_ID, name: 'Musical', description: null },
 ];
 
-interface FramedProps {
-  macro: MacroCategory;
-  macros: Set<MacroCategory>;
-  raws: Set<string>;
-  isOpen: boolean;
-}
-
-function Framed({ macro, macros, raws, isOpen }: FramedProps) {
-  useEffect(() => {
-    useFilterStore.setState({
-      gender: 'Both',
-      letter: null,
-      macroCategories: macros,
-      rawCategories: raws,
-      selectedNameTitle: null,
-    });
-  }, [macros, raws]);
-
-  return (
-    <div className="flex min-h-[80px] items-start bg-white p-6">
-      <CategoryDropdown macro={macro} isOpen={isOpen} onToggle={() => {}} />
-    </div>
-  );
+function resetStore(macros: Set<MacroCategory>, raws: Set<string>) {
+  useFilterStore.setState({
+    gender: 'Both',
+    letter: null,
+    macroCategories: macros,
+    rawCategories: raws,
+    selectedNameTitle: null,
+  });
 }
 
 const meta = {
   title: 'Browse/CategoryDropdown',
-  component: Framed,
+  component: CategoryDropdown,
   parameters: {
     layout: 'fullscreen',
     msw: {
@@ -61,43 +45,40 @@ const meta = {
       ],
     },
   },
-} satisfies Meta<typeof Framed>;
+  args: { macro: 'Famous', isOpen: false, onToggle: () => {} },
+  decorators: [
+    (Story) => (
+      <div className="flex min-h-[80px] items-start bg-white p-6">
+        <Story />
+      </div>
+    ),
+  ],
+  beforeEach: () => {
+    resetStore(new Set(), new Set());
+  },
+} satisfies Meta<typeof CategoryDropdown>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Closed: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set(),
-    raws: new Set(),
-    isOpen: false,
-  },
-};
+export const Closed: Story = {};
 
 export const Open: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set(),
-    raws: new Set(),
-    isOpen: true,
-  },
+  args: { isOpen: true },
 };
 
 export const OpenWithSelections: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set(),
-    raws: new Set([CARTOON_ID, DISNEY_ID]),
-    isOpen: true,
+  args: { isOpen: true },
+  beforeEach: () => {
+    resetStore(new Set(), new Set([CARTOON_ID, DISNEY_ID]));
   },
 };
 
 export const ClosedWithSelections: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set<MacroCategory>(['Famous']),
-    raws: new Set(FAMOUS_RAWS.map((r) => r.id)),
-    isOpen: false,
+  beforeEach: () => {
+    resetStore(
+      new Set<MacroCategory>(['Famous']),
+      new Set(FAMOUS_RAWS.map((r) => r.id)),
+    );
   },
 };

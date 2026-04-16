@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
-import { useEffect } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { useFilterStore } from '../stores/filter-store';
 import type { MacroCategory, RawCategory } from '../types';
@@ -23,33 +23,19 @@ const FAMOUS_RAWS: RawCategory[] = [
   { id: MUSICAL_ID, name: 'Musical', description: null },
 ];
 
-interface FramedProps {
-  macro: MacroCategory;
-  macros: Set<MacroCategory>;
-  raws: Set<string>;
-}
-
-function Framed({ macro, macros, raws }: FramedProps) {
-  useEffect(() => {
-    useFilterStore.setState({
-      gender: 'Both',
-      letter: null,
-      macroCategories: macros,
-      rawCategories: raws,
-      selectedNameTitle: null,
-    });
-  }, [macros, raws]);
-
-  return (
-    <div className="min-h-[120px] bg-white">
-      <CategoryChecklistStrip macro={macro} />
-    </div>
-  );
+function resetStore(macros: Set<MacroCategory>, raws: Set<string>) {
+  useFilterStore.setState({
+    gender: 'Both',
+    letter: null,
+    macroCategories: macros,
+    rawCategories: raws,
+    selectedNameTitle: null,
+  });
 }
 
 const meta = {
   title: 'Browse/CategoryChecklistStrip',
-  component: Framed,
+  component: CategoryChecklistStrip,
   parameters: {
     layout: 'fullscreen',
     msw: {
@@ -60,31 +46,48 @@ const meta = {
       ],
     },
   },
-} satisfies Meta<typeof Framed>;
+  args: { macro: 'Famous' },
+  decorators: [
+    (Story) => (
+      <div className="min-h-[120px] bg-white">
+        <Story />
+      </div>
+    ),
+  ],
+  beforeEach: () => {
+    resetStore(new Set(), new Set());
+  },
+} satisfies Meta<typeof CategoryChecklistStrip>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const NoneChecked: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set(),
-    raws: new Set(),
-  },
-};
+export const NoneChecked: Story = {};
 
 export const WithChecks: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set(),
-    raws: new Set([CARTOON_ID, DISNEY_ID]),
+  beforeEach: () => {
+    resetStore(new Set(), new Set([CARTOON_ID, DISNEY_ID]));
   },
 };
 
 export const AllChecked: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set<MacroCategory>(['Famous']),
-    raws: new Set(FAMOUS_RAWS.map((r) => r.id)),
+  beforeEach: () => {
+    resetStore(
+      new Set<MacroCategory>(['Famous']),
+      new Set(FAMOUS_RAWS.map((r) => r.id)),
+    );
+  },
+};
+
+export const TogglesRawOnClick: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const cartoon = await canvas.findByRole('checkbox', { name: /Cartoon/i });
+    await expect(cartoon).not.toBeChecked();
+    await userEvent.click(cartoon);
+    await expect(cartoon).toBeChecked();
+    await expect(useFilterStore.getState().rawCategories.has(CARTOON_ID)).toBe(
+      true,
+    );
   },
 };

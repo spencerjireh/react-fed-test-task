@@ -1,41 +1,51 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useEffect } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { useFilterStore } from '../stores/filter-store';
 import type { Gender } from '../types';
 
 import { GenderBand } from './gender-band';
 
-function Framed({ initialGender }: { initialGender: Gender | 'Both' }) {
-  useEffect(() => {
-    useFilterStore.setState({
-      gender: initialGender,
-      letter: null,
-      macroCategories: new Set(),
-      rawCategories: new Set(),
-      selectedNameTitle: null,
-    });
-  }, [initialGender]);
-  return <GenderBand />;
+function resetStore(gender: Gender | 'Both') {
+  useFilterStore.setState({
+    gender,
+    letter: null,
+    macroCategories: new Set(),
+    rawCategories: new Set(),
+    selectedNameTitle: null,
+  });
 }
 
 const meta = {
   title: 'Browse/GenderBand',
-  component: Framed,
+  component: GenderBand,
   parameters: { layout: 'fullscreen' },
-} satisfies Meta<typeof Framed>;
+  beforeEach: () => {
+    resetStore('Both');
+  },
+} satisfies Meta<typeof GenderBand>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const BothSelected: Story = {
-  args: { initialGender: 'Both' },
-};
+export const BothSelected: Story = {};
 
 export const MaleSelected: Story = {
-  args: { initialGender: 'M' },
+  beforeEach: () => {
+    resetStore('M');
+  },
 };
 
 export const FemaleSelected: Story = {
-  args: { initialGender: 'F' },
+  beforeEach: () => {
+    resetStore('F');
+  },
+};
+
+export const ClickSelectsFemale: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('radio', { name: 'Female' }));
+    await expect(useFilterStore.getState().gender).toBe('F');
+  },
 };

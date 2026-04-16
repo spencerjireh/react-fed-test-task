@@ -30,7 +30,10 @@ const trigger = cva(
         true: 'relative z-10 border-red-main',
         false: '',
       },
-      active: { true: 'font-medium', false: '' },
+      active: {
+        true: 'font-medium text-red-main hover:text-red-main',
+        false: '',
+      },
     },
   },
 );

@@ -31,7 +31,7 @@ describe('ShareActions', () => {
       screen.getByRole('button', { name: 'Share on Twitter' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Share on Messenger' }),
+      screen.getByRole('button', { name: 'Share on Facebook' }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Share' }),
@@ -68,17 +68,17 @@ describe('ShareActions', () => {
     expect(target).toBe('_blank');
   });
 
-  it('Messenger click opens an fb-messenger:// share deep link', async () => {
+  it('Facebook click opens the Facebook sharer with the current URL', async () => {
     renderApp(<ShareActions title="Andromeda" />);
 
     await userEvent.click(
-      screen.getByRole('button', { name: 'Share on Messenger' }),
+      screen.getByRole('button', { name: 'Share on Facebook' }),
     );
 
     expect(openSpy).toHaveBeenCalledTimes(1);
     const [openUrl] = openSpy.mock.calls[0];
     expect(openUrl).toBe(
-      `fb-messenger://share?link=${encodeURIComponent(window.location.href)}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
     );
   });
 });

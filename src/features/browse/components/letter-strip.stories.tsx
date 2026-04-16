@@ -1,46 +1,58 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useEffect } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 
 import { useFilterStore } from '../stores/filter-store';
 import type { Letter } from '../types';
 
 import { LetterStrip } from './letter-strip';
 
-function Framed({ initialLetter }: { initialLetter: Letter | null }) {
-  useEffect(() => {
-    useFilterStore.setState({
-      gender: 'Both',
-      letter: initialLetter,
-      macroCategories: new Set(),
-      rawCategories: new Set(),
-      selectedNameTitle: null,
-    });
-  }, [initialLetter]);
-  return (
-    <div className="bg-cream-light p-6">
-      <LetterStrip />
-    </div>
-  );
+function resetStore(letter: Letter | null) {
+  useFilterStore.setState({
+    gender: 'Both',
+    letter,
+    macroCategories: new Set(),
+    rawCategories: new Set(),
+    selectedNameTitle: null,
+  });
 }
 
 const meta = {
   title: 'Browse/LetterStrip',
-  component: Framed,
+  component: LetterStrip,
   parameters: { layout: 'fullscreen' },
-} satisfies Meta<typeof Framed>;
+  decorators: [
+    (Story) => (
+      <div className="bg-cream-light p-6">
+        <Story />
+      </div>
+    ),
+  ],
+  beforeEach: () => {
+    resetStore(null);
+  },
+} satisfies Meta<typeof LetterStrip>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: { initialLetter: null },
-};
+export const Default: Story = {};
 
 export const LetterSelected: Story = {
-  args: { initialLetter: 'C' },
+  beforeEach: () => {
+    resetStore('C');
+  },
 };
 
 export const Mobile: Story = {
-  args: { initialLetter: null },
   globals: { viewport: { value: 'mobile1' } },
+};
+
+export const ClickSelectsLetter: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('tab', { name: 'Filter by letter M' }),
+    );
+    await expect(useFilterStore.getState().letter).toBe('M');
+  },
 };

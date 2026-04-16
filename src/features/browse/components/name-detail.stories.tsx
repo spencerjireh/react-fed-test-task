@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
-import { useEffect } from 'react';
 
 import { useFilterStore } from '../stores/filter-store';
 import type { RawName } from '../types';
@@ -31,20 +30,9 @@ const FIXTURE: RawName[] = [
   },
 ];
 
-function Framed({ selectedId }: { selectedId: string | null }) {
-  useEffect(() => {
-    useFilterStore.setState({ selectedNameTitle: selectedId });
-  }, [selectedId]);
-  return (
-    <div className="max-w-screen-sm bg-cream-light p-6">
-      <NameDetail />
-    </div>
-  );
-}
-
 const meta = {
   title: 'Browse/NameDetail',
-  component: Framed,
+  component: NameDetail,
   parameters: {
     layout: 'centered',
     msw: {
@@ -53,15 +41,25 @@ const meta = {
       ],
     },
   },
-} satisfies Meta<typeof Framed>;
+  decorators: [
+    (Story) => (
+      <div className="max-w-screen-sm bg-cream-light p-6">
+        <Story />
+      </div>
+    ),
+  ],
+  beforeEach: () => {
+    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
+  },
+} satisfies Meta<typeof NameDetail>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Selected: Story = {
-  args: { selectedId: 'andromeda-id' },
-};
+export const Selected: Story = {};
 
 export const NoSelection: Story = {
-  args: { selectedId: null },
+  beforeEach: () => {
+    useFilterStore.setState({ selectedNameTitle: null });
+  },
 };

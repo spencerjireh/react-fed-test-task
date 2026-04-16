@@ -45,13 +45,13 @@ export function ShareActions({ title }: ShareActionsProps) {
   };
 
   const handleTweet = () => {
-    const tweetText = `I found the perfect pet name: ${title} — ${href}`;
+    const tweetText = `I found the perfect pet name: ${title}`;
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(href)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleMessenger = () => {
-    const url = `fb-messenger://share?link=${encodeURIComponent(href)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(href)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -63,7 +63,7 @@ export function ShareActions({ title }: ShareActionsProps) {
       <ShareButton aria-label="Share on Twitter" onClick={handleTweet}>
         <ShareTwitterIcon size={24} />
       </ShareButton>
-      <ShareButton aria-label="Share on Messenger" onClick={handleMessenger}>
+      <ShareButton aria-label="Share on Facebook" onClick={handleMessenger}>
         <ShareMessengerIcon size={24} />
       </ShareButton>
 

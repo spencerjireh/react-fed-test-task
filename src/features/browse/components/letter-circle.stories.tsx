@@ -30,3 +30,22 @@ export const Default: Story = {
 export const Selected: Story = {
   args: { isSelected: true },
 };
+
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+export const AllLetters: Story = {
+  args: { isSelected: false },
+  render: () => (
+    <div className="flex flex-wrap justify-center gap-1 rounded-pill bg-white p-2 shadow-pill">
+      {LETTERS.map((letter) => (
+        <LetterCircle
+          key={letter}
+          letter={letter}
+          isSelected={letter === 'G'}
+          isTabbable={letter === 'G'}
+          onSelect={() => {}}
+        />
+      ))}
+    </div>
+  ),
+};

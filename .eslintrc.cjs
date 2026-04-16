@@ -5,10 +5,7 @@ module.exports = {
     es6: true,
   },
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-  ignorePatterns: [
-    'node_modules/*',
-    'public/mockServiceWorker.js',
-  ],
+  ignorePatterns: ['node_modules/*', 'public/mockServiceWorker.js'],
   extends: ['eslint:recommended'],
   plugins: ['check-file'],
   overrides: [
@@ -54,13 +51,7 @@ module.exports = {
                 from: './src/app',
               },
               {
-                target: [
-                  './src/components',
-                  './src/hooks',
-                  './src/lib',
-                  './src/types',
-                  './src/utils',
-                ],
+                target: ['./src/components', './src/hooks', './src/utils'],
                 from: ['./src/features', './src/app'],
               },
             ],
@@ -123,10 +114,7 @@ module.exports = {
       // RTL + jest-dom rule names collide with Playwright's locator API,
       // so scope them to src/ only.
       files: ['src/**/*.{ts,tsx}'],
-      extends: [
-        'plugin:testing-library/react',
-        'plugin:jest-dom/recommended',
-      ],
+      extends: ['plugin:testing-library/react', 'plugin:jest-dom/recommended'],
     },
     {
       files: ['e2e/**/*.ts'],

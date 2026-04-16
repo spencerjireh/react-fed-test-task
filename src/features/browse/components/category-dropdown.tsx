@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/cn';
+import { cn } from '@/utils/cn';
 
 import { useCategories } from '../api/get-categories';
 import { useFilterStore } from '../stores/filter-store';

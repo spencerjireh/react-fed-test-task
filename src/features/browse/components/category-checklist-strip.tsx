@@ -1,7 +1,7 @@
 import { Check, Minus } from 'lucide-react';
 import { useEffect, useMemo, useRef } from 'react';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@/utils/cn';
 
 import { useCategories } from '../api/get-categories';
 import { useFilterStore } from '../stores/filter-store';
@@ -23,10 +23,7 @@ export function CategoryChecklistStrip({ macro }: CategoryChecklistStripProps) {
     [macro, categories],
   );
 
-  const checkedCount = raws.reduce(
-    (acc, r) => (rawCategories.has(r.id) ? acc + 1 : acc),
-    0,
-  );
+  const checkedCount = raws.filter((r) => rawCategories.has(r.id)).length;
   const fullyChecked = raws.length > 0 && checkedCount === raws.length;
   const partiallyChecked = checkedCount > 0 && !fullyChecked;
 

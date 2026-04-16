@@ -30,7 +30,7 @@ export function GenderMacroRow({ name }: GenderMacroRowProps) {
     if (!allCategories || name.categories.length === 0) return null;
     const mine = allCategories.filter((c) => name.categories.includes(c.id));
     if (mine.length === 0) return null;
-    return mine.slice().sort((a, b) => a.name.localeCompare(b.name))[0];
+    return mine.sort((a, b) => a.name.localeCompare(b.name))[0];
   }, [allCategories, name.categories]);
 
   const { icon, label } = iconForGender(name.gender);

@@ -8,9 +8,9 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 import { type BrowseState, useBrowseState } from '../hooks/use-browse-state';
+import { useFilterUrlSync } from '../hooks/use-filter-url-sync';
 import { useReconcileSelection } from '../hooks/use-reconcile-selection';
 import { useFilterStore } from '../stores/filter-store';
-import { useFilterUrlSync } from '../stores/use-filter-url-sync';
 import { focusNameItem } from '../utils/focus-name-item';
 
 import { CoverHero } from './cover-hero';

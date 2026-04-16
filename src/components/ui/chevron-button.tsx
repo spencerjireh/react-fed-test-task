@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
-import { cn } from '@/lib/cn';
+import { cn } from '@/utils/cn';
 
 interface ChevronButtonProps {
   direction: 'up' | 'down';
@@ -11,8 +11,7 @@ interface ChevronButtonProps {
   className?: string;
 }
 
-// SVG inlined so stroke="currentColor" picks up text-* classes;
-// source icons in src/assets/icons/ have hard-coded strokes.
+// SVG inlined so stroke="currentColor" picks up text-* classes.
 export function ChevronButton({
   direction,
   disabled,

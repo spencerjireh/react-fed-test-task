@@ -11,7 +11,7 @@ interface ResultsPaneProps {
   children?: ReactNode;
 }
 
-export function ResultsPane({ children }: ResultsPaneProps = {}) {
+export function ResultsPane({ children }: ResultsPaneProps) {
   const base = import.meta.env.BASE_URL;
   const goToCover = useFilterStore((s) => s.goToCover);
 

@@ -9,7 +9,7 @@ export function MainErrorFallback() {
       </h1>
       <button
         className="mt-4 rounded-md bg-red-main px-4 py-2 text-white"
-        onClick={() => window.location.assign(window.location.origin)}
+        onClick={() => window.location.assign(import.meta.env.BASE_URL)}
       >
         Reload
       </button>

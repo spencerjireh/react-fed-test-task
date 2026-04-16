@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
-import { serializeFilterStateToUrl, useFilterStore } from './filter-store';
+import {
+  serializeFilterStateToUrl,
+  useFilterStore,
+} from '../stores/filter-store';
 
 export function useFilterUrlSync(): void {
   const navigate = useNavigate();

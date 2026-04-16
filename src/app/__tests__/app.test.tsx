@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useFilterStore } from '@/features/browse/stores/filter-store';
 
-import { App } from '../app';
+import { App } from '../index';
 
 // Virtuoso measures its viewport; in jsdom that yields zero height and no rows.
 // Stub it to render every row inline so queries resolve without scrolling.

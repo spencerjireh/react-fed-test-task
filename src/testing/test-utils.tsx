@@ -5,7 +5,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter, useLocation } from 'react-router';
 
-import { useFilterUrlSync } from '@/features/browse/stores/use-filter-url-sync';
+import { useFilterUrlSync } from '@/features/browse/hooks/use-filter-url-sync';
 
 function createTestQueryClient() {
   return new QueryClient({

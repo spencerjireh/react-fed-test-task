@@ -5,7 +5,7 @@ import {
   encodeFilterUrlParams,
   type FilterUrlParams,
   hasFilterUrlParams,
-} from '@/lib/url-state';
+} from '@/utils/url-state';
 
 import {
   type Gender,
@@ -53,6 +53,11 @@ const DEFAULT_STATE: FilterState = {
   macroCategories: new Set(),
   rawCategories: new Set(),
   selectedNameTitle: null,
+};
+
+const COVER_TO_RESULTS_SEED: Pick<FilterState, 'gender' | 'letter'> = {
+  gender: 'M',
+  letter: 'A',
 };
 
 function reconcileMacros(rawCategories: Set<string>): Set<MacroCategory> {
@@ -175,7 +180,7 @@ export const useFilterStore = create<FilterStore>((set) => ({
   setSelectedNameTitle: (selectedNameTitle) => set({ selectedNameTitle }),
 
   // One set() so the URL only navigates once (no ?g=M flash before ?l=A).
-  goToResults: () => set({ gender: 'M', letter: 'A' }),
+  goToResults: () => set(COVER_TO_RESULTS_SEED),
 
   goToCover: () =>
     set({

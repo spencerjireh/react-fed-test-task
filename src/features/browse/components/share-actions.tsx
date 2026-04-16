@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@/utils/cn';
 
 import { ShareLinkIcon } from './icons/share-link';
 import { ShareMessengerIcon } from './icons/share-messenger';

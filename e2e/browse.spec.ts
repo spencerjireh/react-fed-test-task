@@ -34,7 +34,7 @@ test.describe('Browse', () => {
       page.getByRole('button', { name: 'Share on Twitter' }),
     ).toBeVisible();
     await expect(
-      page.getByRole('button', { name: 'Share on Messenger' }),
+      page.getByRole('button', { name: 'Share on Facebook' }),
     ).toBeVisible();
   });
 });

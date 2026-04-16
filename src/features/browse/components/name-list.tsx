@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { type ListRange, Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/cn';
+import { cn } from '@/utils/cn';
 
 import { useNames } from '../api/get-names';
 import { useFilteredNames } from '../hooks/use-filtered-names';

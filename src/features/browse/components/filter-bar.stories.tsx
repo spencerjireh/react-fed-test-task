@@ -25,9 +25,21 @@ function Framed({ macros, raws, initialOpenMacro = null }: FramedProps) {
     });
   }, [macros, raws]);
 
+  useEffect(() => {
+    if (!initialOpenMacro) return;
+    const id = requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLButtonElement>(
+          `button[aria-label="Filter by ${initialOpenMacro}"]`,
+        )
+        ?.click();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [initialOpenMacro]);
+
   return (
     <div className="min-h-[200px] bg-cream-light pb-20 pt-6">
-      <FilterBar initialOpenMacro={initialOpenMacro} />
+      <FilterBar />
     </div>
   );
 }

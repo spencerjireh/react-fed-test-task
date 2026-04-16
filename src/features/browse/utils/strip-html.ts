@@ -1,3 +1,5 @@
 export function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '');
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent ?? '';
 }

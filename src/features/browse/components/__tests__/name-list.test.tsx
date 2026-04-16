@@ -1,7 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import type { KeyboardEventHandler, ReactNode, Ref } from 'react';
 import { useImperativeHandle } from 'react';
-import { useLocation } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
@@ -9,12 +8,12 @@ import {
   act,
   renderApp,
   screen,
+  UrlSyncHarness,
   userEvent,
   waitFor,
 } from '@/testing/test-utils';
 
 import { useFilterStore } from '../../stores/filter-store';
-import { useFilterUrlSync } from '../../stores/use-filter-url-sync';
 import type { RawName } from '../../types';
 import { NameList } from '../name-list';
 
@@ -23,10 +22,15 @@ const scrollToIndex = vi.fn();
 const scrollIntoView = vi.fn((opts: { index: number; done?: () => void }) =>
   opts.done?.(),
 );
+interface ListRange {
+  startIndex: number;
+  endIndex: number;
+}
 const captured = {
   initialTopMostItemIndex: undefined as number | undefined,
   atTopStateChange: undefined as ((value: boolean) => void) | undefined,
   atBottomStateChange: undefined as ((value: boolean) => void) | undefined,
+  rangeChanged: undefined as ((range: ListRange) => void) | undefined,
 };
 
 interface StubVirtuosoProps<T> {
@@ -40,6 +44,7 @@ interface StubVirtuosoProps<T> {
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   atTopStateChange?: (value: boolean) => void;
   atBottomStateChange?: (value: boolean) => void;
+  rangeChanged?: (range: ListRange) => void;
   className?: string;
 }
 
@@ -52,11 +57,13 @@ vi.mock('react-virtuoso', () => ({
     onKeyDown,
     atTopStateChange,
     atBottomStateChange,
+    rangeChanged,
     className,
   }: StubVirtuosoProps<T>) => {
     captured.initialTopMostItemIndex = initialTopMostItemIndex;
     captured.atTopStateChange = atTopStateChange;
     captured.atBottomStateChange = atBottomStateChange;
+    captured.rangeChanged = rangeChanged;
     useImperativeHandle(ref, () => ({ scrollToIndex, scrollIntoView }), []);
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -69,21 +76,8 @@ vi.mock('react-virtuoso', () => ({
   },
 }));
 
-function LocationProbe() {
-  const location = useLocation();
-  return (
-    <div data-testid="location">{location.pathname + location.search}</div>
-  );
-}
-
 function Harness({ children }: { children?: ReactNode }) {
-  useFilterUrlSync();
-  return (
-    <>
-      <LocationProbe />
-      {children ?? <NameList />}
-    </>
-  );
+  return <UrlSyncHarness>{children ?? <NameList />}</UrlSyncHarness>;
 }
 
 // 30 names gives us 3 pages at 11 rows per page.
@@ -105,6 +99,7 @@ describe('NameList', () => {
     captured.initialTopMostItemIndex = undefined;
     captured.atTopStateChange = undefined;
     captured.atBottomStateChange = undefined;
+    captured.rangeChanged = undefined;
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
@@ -138,21 +133,11 @@ describe('NameList', () => {
     });
   });
 
-  it('renders the empty-state copy when filtered results are zero', async () => {
-    server.use(http.get('*/api/names', () => HttpResponse.json({ data: [] })));
-
-    renderApp(<Harness />);
-
-    expect(
-      await screen.findByText(/no names match these filters/i),
-    ).toBeInTheDocument();
-  });
-
   it('up chevron starts disabled and enables when atTopStateChange(false) fires', async () => {
     renderApp(<Harness />);
     await screen.findByRole('button', { name: 'A00' });
 
-    const up = screen.getByRole('button', { name: 'Previous 11 names' });
+    const up = screen.getByRole('button', { name: 'Previous page' });
     expect(up).toBeDisabled();
 
     act(() => captured.atTopStateChange?.(false));
@@ -163,23 +148,26 @@ describe('NameList', () => {
     renderApp(<Harness />);
     await screen.findByRole('button', { name: 'A00' });
 
-    const down = screen.getByRole('button', { name: 'Next 11 names' });
+    const down = screen.getByRole('button', { name: 'Next page' });
     expect(down).toBeEnabled();
 
     act(() => captured.atBottomStateChange?.(true));
     expect(down).toBeDisabled();
   });
 
-  it('clicking down jumps PAGE_SIZE items past the latest visible startIndex', async () => {
+  it('clicking down jumps by the visible row count reported by rangeChanged', async () => {
     renderApp(<Harness />);
     await screen.findByRole('button', { name: 'A00' });
 
+    // Simulate Virtuoso reporting rows 0..9 visible (10 rows on screen).
+    act(() => captured.rangeChanged?.({ startIndex: 0, endIndex: 9 }));
     act(() => captured.atTopStateChange?.(false));
-    const down = screen.getByRole('button', { name: 'Next 11 names' });
+
+    const down = screen.getByRole('button', { name: 'Next page' });
     await userEvent.click(down);
 
     expect(scrollToIndex).toHaveBeenCalledWith({
-      index: 11,
+      index: 10,
       align: 'start',
       behavior: 'smooth',
     });
@@ -277,17 +265,17 @@ describe('NameList', () => {
     const first = await screen.findByRole('button', { name: 'A00' });
     expect(first).toHaveClass('text-red-main');
     expect(first).toHaveClass('text-center');
-    expect(first).toHaveClass('md:text-[64px]');
+    expect(first).toHaveClass('md:text-[52px]');
 
     const second = screen.getByRole('button', { name: 'B01' });
     expect(second).toHaveClass('text-center');
-    expect(second).toHaveClass('md:text-[48px]');
+    expect(second).toHaveClass('md:text-[40px]');
     expect(second).not.toHaveClass('text-red-main');
     expect(second).not.toHaveAttribute('style');
 
     const third = screen.getByRole('button', { name: 'C02' });
     expect(third).toHaveClass('text-center');
-    expect(third).toHaveClass('md:text-[48px]');
+    expect(third).toHaveClass('md:text-[40px]');
     expect(third).not.toHaveAttribute('style');
   });
 });

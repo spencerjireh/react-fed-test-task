@@ -4,7 +4,7 @@ import { useImperativeHandle } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
-import { renderApp, screen } from '@/testing/test-utils';
+import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
 import { useFilterStore } from '../../stores/filter-store';
 import type { RawName } from '../../types';
@@ -127,5 +127,62 @@ describe('BrowseLayout', () => {
 
     await screen.findByRole('region', { name: 'Selected name details' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('Escape on desktop clears the selection and restores focus to the list item', async () => {
+    stubMatchMedia(true);
+    useFilterStore.setState({
+      gender: 'F',
+      selectedNameTitle: 'Andromeda',
+    });
+
+    renderApp(<BrowseLayout />);
+
+    const listItem = await screen.findByRole('button', { name: 'Andromeda' });
+
+    await userEvent.keyboard('{Escape}');
+
+    await waitFor(() => {
+      expect(useFilterStore.getState().selectedNameTitle).toBeNull();
+    });
+    await waitFor(() => expect(listItem).toHaveFocus());
+  });
+
+  it('renders EmptyResults when filters exclude every name', async () => {
+    stubMatchMedia(true);
+    useFilterStore.setState({ gender: 'F', letter: 'Z' });
+
+    renderApp(<BrowseLayout />);
+
+    expect(
+      await screen.findByRole('heading', { name: /no luck/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/female names starting with z/i),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('results-puppy-img')).toBeInTheDocument();
+  });
+
+  it('Clear filters in EmptyResults resets gender + categories but keeps letter', async () => {
+    stubMatchMedia(true);
+    useFilterStore.setState({
+      gender: 'F',
+      letter: 'Z',
+      macroCategories: new Set(['Famous']),
+    });
+
+    renderApp(<BrowseLayout />);
+
+    const button = await screen.findByRole('button', {
+      name: /clear filters/i,
+    });
+    await userEvent.click(button);
+
+    await waitFor(() => {
+      const state = useFilterStore.getState();
+      expect(state.gender).toBe('Both');
+      expect(state.macroCategories.size).toBe(0);
+      expect(state.letter).toBe('Z');
+    });
   });
 });

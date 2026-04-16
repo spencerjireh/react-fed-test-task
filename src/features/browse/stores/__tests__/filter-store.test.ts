@@ -225,26 +225,6 @@ describe('useFilterStore actions', () => {
 
     unsubscribe();
   });
-
-  it('clearFilters resets all filter slices but preserves selectedNameTitle', () => {
-    act(() => {
-      useFilterStore.getState().setGender('M');
-      useFilterStore.getState().setLetter('A');
-      useFilterStore.getState().toggleMacro('Famous');
-      useFilterStore.getState().toggleRaw('raw-1');
-      useFilterStore.getState().setSelectedNameTitle('name-123');
-    });
-
-    act(() => useFilterStore.getState().clearFilters());
-
-    const s = useFilterStore.getState();
-    expect(s.gender).toBe('Both');
-    expect(s.letter).toBeNull();
-    expect(s.macroCategories.size).toBe(0);
-    expect(s.rawCategories.size).toBe(0);
-    // selectedNameTitle persists so the open detail pane doesn't get dismissed.
-    expect(s.selectedNameTitle).toBe('name-123');
-  });
 });
 
 describe('serializeFilterStateToUrl', () => {

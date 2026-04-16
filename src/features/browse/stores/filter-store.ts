@@ -7,7 +7,13 @@ import {
   hasFilterUrlParams,
 } from '@/lib/url-state';
 
-import type { Gender, Letter, MacroCategory } from '../types';
+import {
+  type Gender,
+  isMacroCategory,
+  type Letter,
+  MACRO_CATEGORIES,
+  type MacroCategory,
+} from '../types';
 import { getMacrosFor, getRawIdsForMacro } from '../utils/macro-category-map';
 
 export interface FilterState {
@@ -18,39 +24,21 @@ export interface FilterState {
   selectedNameTitle: string | null;
 }
 
-export interface FilterActions {
+interface FilterActions {
   setGender: (gender: Gender | 'Both') => void;
   setLetter: (letter: Letter | null) => void;
   toggleMacro: (macro: MacroCategory) => void;
   toggleRaw: (rawCategoryId: string) => void;
   setSelectedNameTitle: (title: string | null) => void;
-  clearFilters: () => void;
   goToResults: () => void;
   goToCover: () => void;
+  clearFilters: () => void;
 }
 
-export type FilterStore = FilterState & FilterActions;
-
-const VALID_MACRO_CATEGORIES: readonly MacroCategory[] = [
-  'Famous',
-  "Pet's size",
-  'Joyful',
-  'Funny',
-  'Food and drinks',
-  'International',
-  'Others',
-];
-
-function isMacroCategory(value: string): value is MacroCategory {
-  return (VALID_MACRO_CATEGORIES as readonly string[]).includes(value);
-}
+type FilterStore = FilterState & FilterActions;
 
 function isGender(value: string): value is Gender {
   return value === 'M' || value === 'F';
-}
-
-function isLetter(value: string): value is Letter {
-  return value.length > 0;
 }
 
 const DEFAULT_STATE: FilterState = {
@@ -63,7 +51,7 @@ const DEFAULT_STATE: FilterState = {
 
 function reconcileMacros(rawCategories: Set<string>): Set<MacroCategory> {
   const next = new Set<MacroCategory>();
-  for (const macro of VALID_MACRO_CATEGORIES) {
+  for (const macro of MACRO_CATEGORIES) {
     const childIds = getRawIdsForMacro(macro);
     if (childIds.length === 0) continue;
     if (childIds.every((id) => rawCategories.has(id))) {
@@ -87,8 +75,7 @@ function canonicalize(
 function fromUrlParams(params: FilterUrlParams): FilterState {
   const gender: Gender | 'Both' =
     params.gender && isGender(params.gender) ? params.gender : 'Both';
-  const letter =
-    params.letter && isLetter(params.letter) ? params.letter : null;
+  const letter = params.letter ?? null;
   const macros = new Set(
     (params.macroCategories ?? []).filter(isMacroCategory),
   );
@@ -174,18 +161,9 @@ export const useFilterStore = create<FilterStore>((set) => ({
 
   setSelectedNameTitle: (selectedNameTitle) => set({ selectedNameTitle }),
 
-  clearFilters: () =>
-    set({
-      gender: 'Both',
-      letter: null,
-      macroCategories: new Set(),
-      rawCategories: new Set(),
-    }),
-
   // One set() so the URL only navigates once (no ?g=M flash before ?l=A).
   goToResults: () => set({ gender: 'M', letter: 'A' }),
 
-  // Like clearFilters, but also drops selectedNameTitle so the URL goes bare.
   goToCover: () =>
     set({
       gender: 'Both',
@@ -193,5 +171,12 @@ export const useFilterStore = create<FilterStore>((set) => ({
       macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
+    }),
+
+  clearFilters: () =>
+    set({
+      gender: 'Both',
+      macroCategories: new Set(),
+      rawCategories: new Set(),
     }),
 }));

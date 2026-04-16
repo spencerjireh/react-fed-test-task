@@ -1,48 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/cn';
 
-import type { MacroCategory } from '../types';
+import { MACRO_CATEGORIES, type MacroCategory } from '../types';
 
 import { CategoryChecklistStrip } from './category-checklist-strip';
 import { CategoryDropdown } from './category-dropdown';
 
-const MACROS: readonly MacroCategory[] = [
-  'Famous',
-  "Pet's size",
-  'Joyful',
-  'Funny',
-  'Food and drinks',
-  'International',
-  'Others',
-];
-
-interface FilterBarProps {
-  // Storybook uses this to render an initially-open strip without a click.
-  initialOpenMacro?: MacroCategory | null;
-}
-
-export function FilterBar({ initialOpenMacro = null }: FilterBarProps = {}) {
-  const [openMacro, setOpenMacro] = useState<MacroCategory | null>(
-    initialOpenMacro,
-  );
-  const sectionRef = useRef<HTMLElement | null>(null);
+export function FilterBar() {
+  const [openMacro, setOpenMacro] = useState<MacroCategory | null>(null);
 
   useEffect(() => {
     if (!openMacro) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpenMacro(null);
     };
-    const onPointerDown = (event: MouseEvent) => {
-      const root = sectionRef.current;
-      if (!root) return;
-      if (!root.contains(event.target as Node)) setOpenMacro(null);
+    const onClick = (event: MouseEvent) => {
+      const target = event.target as Element | null;
+      if (target?.closest('[data-filter-chrome]')) return;
+      setOpenMacro(null);
     };
     document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('click', onClick);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('click', onClick);
     };
   }, [openMacro]);
 
@@ -52,7 +34,7 @@ export function FilterBar({ initialOpenMacro = null }: FilterBarProps = {}) {
 
   return (
     <section
-      ref={sectionRef}
+      data-filter-chrome
       aria-label="Category filters"
       className={cn(
         'md:border-t md:border-neutral-light md:bg-white',
@@ -68,7 +50,7 @@ export function FilterBar({ initialOpenMacro = null }: FilterBarProps = {}) {
           className="hidden h-full w-px shrink-0 bg-neutral-light md:block"
         />
         <div className="flex items-center">
-          {MACROS.map((macro) => (
+          {MACRO_CATEGORIES.map((macro) => (
             <CategoryDropdown
               key={macro}
               macro={macro}

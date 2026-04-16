@@ -3,26 +3,21 @@ import { useRef, useState } from 'react';
 import { type ListRange, Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { PAGE_SIZE, VIEWPORT_HEIGHT } from '@/config/constants';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/cn';
 
 import { useNames } from '../api/get-names';
 import { useFilteredNames } from '../hooks/use-filtered-names';
 import { useFilterStore } from '../stores/filter-store';
+import { focusNameItem } from '../utils/focus-name-item';
 
 import { ChevronPair } from './chevron-pair';
 import { NameListItem } from './name-list-item';
 
+const SKELETON_ROWS = 10;
+
 interface NameListProps {
   chevronSide?: 'left' | 'right';
   variant?: 'detail' | 'results';
-}
-
-function focusByTitle(title: string) {
-  const selector = `[data-name-title="${CSS.escape(title)}"]`;
-  const el = document.querySelector(selector);
-  (el as HTMLElement | null)?.focus();
 }
 
 export function NameList({
@@ -37,8 +32,6 @@ export function NameList({
   const setSelectedNameTitle = useFilterStore((s) => s.setSelectedNameTitle);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
-  const listHeight = isDesktop ? VIEWPORT_HEIGHT : '70vh';
 
   const [atTop, setAtTop] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
@@ -56,12 +49,6 @@ export function NameList({
       </p>
     );
   }
-  if (filtered.length === 0) {
-    return (
-      <p className="py-4 text-neutral-mid">No names match these filters.</p>
-    );
-  }
-
   const anchor = selectedNameTitle
     ? Math.max(
         0,
@@ -78,10 +65,13 @@ export function NameList({
     }
   };
 
-  const jumpBy = (delta: number) => {
+  const jumpByPage = (direction: 1 | -1) => {
+    const { startIndex, endIndex } = lastRange.current;
+    // endIndex is inclusive; +1 gives the visible row count.
+    const visibleCount = Math.max(1, endIndex - startIndex + 1);
     const target = Math.max(
       0,
-      Math.min(filtered.length - 1, lastRange.current.startIndex + delta),
+      Math.min(filtered.length - 1, startIndex + direction * visibleCount),
     );
     virtuosoRef.current?.scrollToIndex({
       index: target,
@@ -107,14 +97,14 @@ export function NameList({
     const nextTitle = filtered[nextIndex].title;
     virtuosoRef.current?.scrollIntoView({
       index: nextIndex,
-      done: () => focusByTitle(nextTitle),
+      done: () => focusNameItem(nextTitle),
     });
   };
 
   return (
     <div
       className={cn(
-        'flex items-start gap-8 md:gap-[52px]',
+        'flex h-full min-h-0 items-stretch gap-8 md:gap-[52px]',
         chevronSide === 'right' && 'flex-row-reverse',
       )}
       data-chevron-side={chevronSide}
@@ -122,8 +112,8 @@ export function NameList({
       <ChevronPair
         atTop={atTop}
         atBottom={atBottom}
-        onPrev={() => jumpBy(-PAGE_SIZE)}
-        onNext={() => jumpBy(PAGE_SIZE)}
+        onPrev={() => jumpByPage(-1)}
+        onNext={() => jumpByPage(1)}
       />
       <Virtuoso
         ref={virtuosoRef}
@@ -132,7 +122,7 @@ export function NameList({
         rangeChanged={handleRangeChanged}
         atTopStateChange={setAtTop}
         atBottomStateChange={setAtBottom}
-        style={{ height: listHeight }}
+        style={{ height: '100%' }}
         className="scrollbar-none w-full"
         aria-label="Pet names"
         onKeyDown={handleKeyDown}
@@ -141,7 +131,7 @@ export function NameList({
             name={name}
             isSelected={name.title === selectedNameTitle}
             onSelect={setSelectedNameTitle}
-            centerDistance={centerEffect ? Math.abs(index - centerIndex) : null}
+            isCentered={centerEffect && index === centerIndex}
             variant={variant}
           />
         )}
@@ -152,12 +142,8 @@ export function NameList({
 
 function NameListSkeleton() {
   return (
-    <div
-      className="flex flex-col gap-3"
-      style={{ height: VIEWPORT_HEIGHT }}
-      aria-label="Loading names"
-    >
-      {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+    <div className="flex h-full flex-col gap-3" aria-label="Loading names">
+      {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
         <Skeleton key={i} className="h-[45px] w-full" />
       ))}
     </div>

@@ -31,7 +31,7 @@ test.describe('Category filter', () => {
 
     await page.keyboard.press('Escape');
 
-    await expect(page.getByRole('button', { name: 'Whisky' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Brandy' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Aaron' })).toHaveCount(0);
   });
 });

@@ -4,16 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 import { useFilterStore } from '../stores/filter-store';
+import { focusNameItem } from '../utils/focus-name-item';
 
 import { NameDetail } from './name-detail';
-
-function restoreFocusToListItem(title: string) {
-  queueMicrotask(() => {
-    const selector = `[data-name-title="${CSS.escape(title)}"]`;
-    const target = document.querySelector(selector);
-    (target as HTMLElement | null)?.focus();
-  });
-}
 
 export function NameDetailDialog() {
   const selectedNameTitle = useFilterStore((s) => s.selectedNameTitle);
@@ -26,7 +19,7 @@ export function NameDetailDialog() {
     if (next) return;
     const previousTitle = selectedNameTitle;
     setSelectedNameTitle(null);
-    if (previousTitle) restoreFocusToListItem(previousTitle);
+    if (previousTitle) queueMicrotask(() => focusNameItem(previousTitle));
   };
 
   const sheetTransition = reduce

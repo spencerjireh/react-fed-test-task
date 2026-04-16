@@ -5,8 +5,7 @@ import { decorateNames } from '../utils/decorate-name';
 
 import { API_BASE } from './client';
 
-/** Fetches the full names collection and returns decorated `Name[]`. */
-export async function fetchNames(): Promise<Name[]> {
+async function fetchNames(): Promise<Name[]> {
   const res = await fetch(`${API_BASE}/names`);
   if (!res.ok) throw new Error(`fetch names: ${res.status}`);
   const { data } = (await res.json()) as { data: RawName[] };

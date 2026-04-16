@@ -27,11 +27,20 @@ describe('stripHtml', () => {
     expect(stripHtml('no tags here')).toBe('no tags here');
   });
 
-  it('preserves HTML entities — this is a known contract, not a bug', () => {
-    // `stripHtml` is a tag-stripper, not a full HTML decoder. Entities like
-    // `&rsquo;` (right single quote) remain literal in the output; the raw
-    // data uses the escaped form, and downstream rendering either accepts
-    // the literal or handles decoding elsewhere.
-    expect(stripHtml('<p>Homer&rsquo;s</p>')).toBe('Homer&rsquo;s');
+  it('decodes named entities (nbsp, rsquo, amp)', () => {
+    expect(stripHtml('<p>Homer&rsquo;s</p>')).toBe('Homer\u2019s');
+    expect(stripHtml('A&nbsp;B')).toBe('A\u00A0B');
+    expect(stripHtml('Tom &amp; Jerry')).toBe('Tom & Jerry');
+  });
+
+  it('decodes trailing &nbsp; commonly left by the CMS export', () => {
+    expect(stripHtml('<p>Aaron is great.&nbsp;</p>')).toBe(
+      'Aaron is great.\u00A0',
+    );
+  });
+
+  it('decodes numeric character references', () => {
+    expect(stripHtml('&#8217;')).toBe('\u2019');
+    expect(stripHtml('&#x2019;')).toBe('\u2019');
   });
 });

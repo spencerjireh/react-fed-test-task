@@ -1,5 +1,4 @@
 import { ChevronButton } from '@/components/ui/chevron-button';
-import { VIEWPORT_HEIGHT } from '@/config/constants';
 
 interface ChevronPairProps {
   atTop: boolean;
@@ -15,21 +14,18 @@ export function ChevronPair({
   onNext,
 }: ChevronPairProps) {
   return (
-    <div
-      className="hidden flex-col justify-between md:flex"
-      style={{ height: VIEWPORT_HEIGHT }}
-    >
+    <div className="hidden h-full flex-col justify-between md:flex">
       <ChevronButton
         direction="up"
         disabled={atTop}
         onClick={onPrev}
-        aria-label="Previous 11 names"
+        aria-label="Previous page"
       />
       <ChevronButton
         direction="down"
         disabled={atBottom}
         onClick={onNext}
-        aria-label="Next 11 names"
+        aria-label="Next page"
       />
     </div>
   );

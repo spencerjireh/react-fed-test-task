@@ -4,7 +4,7 @@ import type { RawCategory } from '../types';
 
 import { API_BASE } from './client';
 
-export async function fetchCategories(): Promise<RawCategory[]> {
+async function fetchCategories(): Promise<RawCategory[]> {
   const res = await fetch(`${API_BASE}/categories`);
   if (!res.ok) throw new Error(`fetch categories: ${res.status}`);
   const { data } = (await res.json()) as { data: RawCategory[] };

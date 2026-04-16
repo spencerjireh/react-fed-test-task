@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
-import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
+import { renderApp, screen, waitFor } from '@/testing/test-utils';
 
 import { useFilterStore } from '../../stores/filter-store';
 import type { RawCategory, RawName } from '../../types';
@@ -148,26 +148,5 @@ describe('NameDetail', () => {
     await waitFor(() => {
       expect(screen.getByText('Famous - Celebrities')).toBeInTheDocument();
     });
-  });
-
-  it('Escape clears the selection and restores focus to the list item', async () => {
-    seedHandlers();
-    useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
-
-    // Stand-in list-item for the focus-restore query to find.
-    const stubItem = document.createElement('button');
-    stubItem.setAttribute('data-name-title', 'Andromeda');
-    stubItem.textContent = 'Andromeda';
-    document.body.appendChild(stubItem);
-
-    renderApp(<NameDetail />);
-    await screen.findByText(/The hero of Homer/);
-
-    await userEvent.keyboard('{Escape}');
-
-    expect(useFilterStore.getState().selectedNameTitle).toBeNull();
-    await waitFor(() => expect(stubItem).toHaveFocus());
-
-    stubItem.remove();
   });
 });

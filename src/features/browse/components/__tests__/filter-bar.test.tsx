@@ -139,4 +139,26 @@ describe('FilterBar', () => {
 
     outside.remove();
   });
+
+  it('clicking a sibling tagged data-filter-chrome (e.g. letter strip) keeps the strip open', async () => {
+    const peer = document.createElement('button');
+    peer.textContent = 'letter B';
+    peer.setAttribute('data-filter-chrome', '');
+    document.body.appendChild(peer);
+
+    renderApp(<FilterBar />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Filter by Famous' }),
+    );
+    await screen.findByRole('group', { name: 'Famous categories' });
+
+    await userEvent.click(peer);
+
+    expect(
+      screen.getByRole('group', { name: 'Famous categories' }),
+    ).toBeInTheDocument();
+
+    peer.remove();
+  });
 });

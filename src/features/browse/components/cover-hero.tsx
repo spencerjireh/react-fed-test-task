@@ -62,7 +62,7 @@ export function CoverHero() {
       type="button"
       aria-label="Start browsing names"
       onClick={goToResults}
-      className="relative mx-auto mt-2 block aspect-[4/3] w-full max-w-[min(1110px,calc((100svh-400px)*4/3))] cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main md:mt-[8px]"
+      className="relative mx-auto mt-2 block aspect-[4/3] w-full max-w-[min(1110px,calc((100svh-440px)*4/3))] cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main md:mt-[8px]"
       style={{ containerType: 'inline-size' }}
     >
       {/* Outer wrapper owns the static offset; inner motion.div owns x/y.
@@ -84,10 +84,7 @@ export function CoverHero() {
         </motion.div>
       </div>
 
-      <div
-        className="pointer-events-none absolute inset-0 z-10 flex items-end justify-center"
-        style={{ transform: 'translateY(4%)' }}
-      >
+      <div className="pointer-events-none absolute inset-0 z-10 flex translate-y-0 items-end justify-center [@media(min-height:800px)]:translate-y-[4%]">
         <picture className="block h-[85%]">
           <source srcSet={`${base}${COVER_HERO_WEBP}`} type="image/webp" />
           <motion.img

@@ -67,9 +67,10 @@ export function LetterStrip() {
     <div
       role="tablist"
       aria-label="Filter by letter"
+      data-filter-chrome
       onKeyDown={handleKeyDown}
       tabIndex={-1}
-      className="mx-auto flex w-fit flex-wrap items-center justify-center gap-1 rounded-pill bg-white p-1.5 shadow-pill md:flex-nowrap md:p-2"
+      className="mx-auto flex w-fit flex-wrap items-center justify-center gap-1 rounded-3xl bg-white p-1.5 shadow-pill md:flex-nowrap md:rounded-pill md:p-2"
     >
       {letters.map((l, i) => (
         <LetterCircle

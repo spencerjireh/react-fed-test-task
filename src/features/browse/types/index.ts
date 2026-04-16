@@ -16,14 +16,21 @@ export interface RawCategory {
 
 export type Letter = string;
 
-export type MacroCategory =
-  | 'Famous'
-  | "Pet's size"
-  | 'Joyful'
-  | 'Funny'
-  | 'Food and drinks'
-  | 'International'
-  | 'Others';
+export const MACRO_CATEGORIES = [
+  'Famous',
+  "Pet's size",
+  'Joyful',
+  'Funny',
+  'Food and drinks',
+  'International',
+  'Others',
+] as const;
+
+export type MacroCategory = (typeof MACRO_CATEGORIES)[number];
+
+export function isMacroCategory(value: string): value is MacroCategory {
+  return (MACRO_CATEGORIES as readonly string[]).includes(value);
+}
 
 export interface Name extends RawName {
   initial: string;

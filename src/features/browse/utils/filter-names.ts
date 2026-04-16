@@ -1,7 +1,6 @@
 import type { FilterState } from '../stores/filter-store';
 import type { Name } from '../types';
 
-/** Pure filter predicate for the browse list. */
 export function filterNames(
   names: Name[],
   state: Pick<

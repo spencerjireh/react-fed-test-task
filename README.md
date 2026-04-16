@@ -2,7 +2,17 @@
 
 A single-page app for browsing 679 pet names. Filter by gender, letter, or category. Every view is a shareable URL. There's no backend; MSW intercepts `/api/*` in the browser.
 
-Implements the Pet Name Finder take-home; the task brief lives in `React_FED_Test_Task.md`.
+**Live demo:** https://spencerjireh.github.io/react-fed-test-task/
+
+## Screenshots
+
+| Cover                                                          | Results                                                                  |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| ![Cover state with the "I need a name" hero](assets/cover.png) | ![Results state with papillon beside the name stack](assets/results.png) |
+
+| Detail                                                                                       | Mobile detail                                                   |
+| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| ![Detail state with master list on the left and description on the right](assets/detail.png) | ![Mobile detail bottom sheet overlay](assets/mobile-detail.png) |
 
 ## Built with
 

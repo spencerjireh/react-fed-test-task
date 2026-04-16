@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { API_BASE } from './client';
 
-export async function fetchLetters(): Promise<string[]> {
+async function fetchLetters(): Promise<string[]> {
   const res = await fetch(`${API_BASE}/letters`);
   if (!res.ok) throw new Error(`fetch letters: ${res.status}`);
   const { data } = (await res.json()) as { data: string[] };

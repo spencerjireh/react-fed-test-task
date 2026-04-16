@@ -29,7 +29,7 @@ test.describe('Cover V1', () => {
     ).toHaveCount(0);
   });
 
-  test('a bogus selection token still shows the hero and leaves the URL intact', async ({
+  test('a bogus selection token shows the hero and strips the token from the URL', async ({
     page,
   }) => {
     await page.goto('/?n=NoSuchName');
@@ -39,6 +39,6 @@ test.describe('Cover V1', () => {
     await expect(
       page.getByRole('region', { name: /selected name details/i }),
     ).toHaveCount(0);
-    await expect(page).toHaveURL(/n=NoSuchName/);
+    await expect(page).not.toHaveURL(/n=NoSuchName/);
   });
 });

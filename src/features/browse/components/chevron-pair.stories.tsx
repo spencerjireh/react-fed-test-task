@@ -12,7 +12,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="bg-cream-light p-6">
+      <div className="flex h-[600px] bg-cream-light p-6">
         <Story />
       </div>
     ),

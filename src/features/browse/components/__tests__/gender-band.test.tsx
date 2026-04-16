@@ -1,29 +1,15 @@
-import type { ReactNode } from 'react';
-import { useLocation } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
+import {
+  renderApp,
+  screen,
+  UrlSyncHarness as Harness,
+  userEvent,
+  waitFor,
+} from '@/testing/test-utils';
 
 import { useFilterStore } from '../../stores/filter-store';
-import { useFilterUrlSync } from '../../stores/use-filter-url-sync';
 import { GenderBand } from '../gender-band';
-
-function LocationProbe() {
-  const location = useLocation();
-  return (
-    <div data-testid="location">{location.pathname + location.search}</div>
-  );
-}
-
-function Harness({ children }: { children: ReactNode }) {
-  useFilterUrlSync();
-  return (
-    <>
-      <LocationProbe />
-      {children}
-    </>
-  );
-}
 
 describe('GenderBand', () => {
   beforeEach(() => {

@@ -1,6 +1,10 @@
 import categoriesJson from '@/testing/mocks/data/categories.json';
 
-import type { MacroCategory, RawCategory } from '../types';
+import {
+  isMacroCategory,
+  type MacroCategory,
+  type RawCategory,
+} from '../types';
 
 interface FilterGroup {
   id: string;
@@ -9,18 +13,6 @@ interface FilterGroup {
 }
 
 const FILTER_GROUPS = categoriesJson.filterGroups as FilterGroup[];
-
-function isMacroCategory(label: string): label is MacroCategory {
-  return (
-    label === 'Famous' ||
-    label === "Pet's size" ||
-    label === 'Joyful' ||
-    label === 'Funny' ||
-    label === 'Food and drinks' ||
-    label === 'International' ||
-    label === 'Others'
-  );
-}
 
 const CATEGORY_ID_TO_MACROS: Record<string, readonly MacroCategory[]> = (() => {
   const map: Record<string, MacroCategory[]> = {};

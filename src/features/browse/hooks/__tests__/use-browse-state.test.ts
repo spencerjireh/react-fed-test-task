@@ -18,14 +18,15 @@ function buildName(title: string): Name {
   };
 }
 
-const names = [buildName('Aaron'), buildName('Ace')];
+let currentNames: Name[] | undefined = [buildName('Aaron'), buildName('Ace')];
 
 vi.mock('../../api/get-names', () => ({
-  useNames: () => ({ data: names }),
+  useNames: () => ({ data: currentNames }),
 }));
 
 beforeEach(() => {
   window.history.replaceState({}, '', '/');
+  currentNames = [buildName('Aaron'), buildName('Ace')];
   useFilterStore.setState({
     gender: 'Both',
     letter: null,
@@ -53,16 +54,16 @@ describe('useBrowseState', () => {
     expect(result.current).toBe('results');
   });
 
-  it('returns "results" when a macro category is toggled on', () => {
+  it('returns "empty-results" when a macro category excludes every name', () => {
     act(() => useFilterStore.getState().toggleMacro('Famous'));
     const { result } = renderHook(() => useBrowseState());
-    expect(result.current).toBe('results');
+    expect(result.current).toBe('empty-results');
   });
 
-  it('returns "results" when a raw category is toggled on', () => {
+  it('returns "empty-results" when a raw category excludes every name', () => {
     act(() => useFilterStore.getState().toggleRaw('raw-1'));
     const { result } = renderHook(() => useBrowseState());
-    expect(result.current).toBe('results');
+    expect(result.current).toBe('empty-results');
   });
 
   it('returns "detail" when selection resolves — even with no filters', () => {
@@ -100,6 +101,19 @@ describe('useBrowseState', () => {
     const { result } = renderHook(() => useBrowseState());
     expect(result.current).toBe('cover');
     act(() => useFilterStore.getState().goToResults());
+    expect(result.current).toBe('results');
+  });
+
+  it('returns "empty-results" when filters exclude every name', () => {
+    act(() => useFilterStore.getState().setLetter('Z'));
+    const { result } = renderHook(() => useBrowseState());
+    expect(result.current).toBe('empty-results');
+  });
+
+  it('stays "results" while names are loading, even with restrictive filters', () => {
+    currentNames = undefined;
+    act(() => useFilterStore.getState().setLetter('Z'));
+    const { result } = renderHook(() => useBrowseState());
     expect(result.current).toBe('results');
   });
 });

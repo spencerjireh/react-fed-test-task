@@ -9,7 +9,7 @@ interface NameListItemProps {
   isSelected: boolean;
   onSelect: (title: string) => void;
   ref?: Ref<HTMLButtonElement>;
-  centerDistance?: number | null;
+  isCentered?: boolean;
   variant?: 'detail' | 'results';
 }
 
@@ -18,11 +18,10 @@ export function NameListItem({
   name,
   isSelected,
   onSelect,
-  centerDistance = null,
+  isCentered = false,
   variant = 'detail',
 }: NameListItemProps) {
-  const isCenter = centerDistance === 0;
-  const renderAsFocal = isSelected || isCenter;
+  const renderAsFocal = isSelected || isCentered;
 
   return (
     <button
@@ -37,10 +36,10 @@ export function NameListItem({
         variant === 'results' ? 'text-center' : 'text-left',
         renderAsFocal
           ? variant === 'results'
-            ? 'text-[36px] font-normal leading-tight text-red-main md:text-[64px]'
+            ? 'text-[30px] font-normal leading-tight text-red-main md:text-[52px]'
             : 'text-[28px] font-normal leading-tight text-red-main md:text-[45px]'
           : variant === 'results'
-            ? 'text-[26px] font-light leading-tight text-neutral-dark/80 hover:text-neutral-dark md:text-[48px]'
+            ? 'text-[22px] font-light leading-tight text-neutral-dark/80 hover:text-neutral-dark md:text-[40px]'
             : 'text-[20px] font-light leading-tight text-neutral-dark/80 hover:text-neutral-dark md:text-[35px]',
       )}
     >

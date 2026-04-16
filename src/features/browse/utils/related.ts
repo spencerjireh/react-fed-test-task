@@ -1,6 +1,5 @@
 import type { Name } from '../types';
 
-/** Returns the most related names for the current selection. */
 export function relatedNames(
   names: Name[],
   currentId: string,

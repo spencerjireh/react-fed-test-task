@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router';
 
 import { serializeFilterStateToUrl, useFilterStore } from './filter-store';
 
-/** Keeps the URL in sync with the filter store. */
 export function useFilterUrlSync(): void {
   const navigate = useNavigate();
 

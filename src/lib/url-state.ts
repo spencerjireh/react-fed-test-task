@@ -6,7 +6,6 @@ export interface FilterUrlParams {
   selectedNameTitle?: string;
 }
 
-// Short query-string keys used by the browse filters.
 const KEYS = {
   gender: 'g',
   letter: 'l',
@@ -15,10 +14,9 @@ const KEYS = {
   selectedNameTitle: 'n',
 } as const;
 
-/** Recognized filter-state keys in a URL. */
-export const FILTER_URL_KEYS = Object.values(KEYS);
+const FILTER_URL_KEYS = Object.values(KEYS);
 
-/** Encodes filter params without a leading `?`. */
+// Returns `k=v&…` with no leading `?`.
 export function encodeFilterUrlParams(params: FilterUrlParams): string {
   const search = new URLSearchParams();
   if (params.gender) search.set(KEYS.gender, params.gender);
@@ -34,7 +32,6 @@ export function encodeFilterUrlParams(params: FilterUrlParams): string {
   return search.toString();
 }
 
-/** Decodes a query string or URLSearchParams into filter params. */
 export function decodeFilterUrlParams(
   input: URLSearchParams | string,
 ): FilterUrlParams {
@@ -66,7 +63,6 @@ export function decodeFilterUrlParams(
   return result;
 }
 
-/** True when the URL includes any filter-state keys. */
 export function hasFilterUrlParams(input: URLSearchParams | string): boolean {
   const search =
     input instanceof URLSearchParams ? input : new URLSearchParams(input);

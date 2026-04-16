@@ -18,7 +18,7 @@ function Framed() {
   }, []);
 
   return (
-    <div className="w-[352px] bg-cream-light p-6">
+    <div className="flex h-[600px] w-[352px] flex-col bg-cream-light p-6">
       <NameList />
     </div>
   );

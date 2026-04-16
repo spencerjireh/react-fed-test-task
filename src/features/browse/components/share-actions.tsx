@@ -1,4 +1,3 @@
-import { Share2 } from 'lucide-react';
 import type { ButtonHTMLAttributes } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -55,34 +54,17 @@ export function ShareActions({ title }: ShareActionsProps) {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const handleNativeShare = async () => {
-    if (!('share' in navigator)) return;
-    try {
-      await navigator.share({ title: `${title} - Pet Names`, url: href });
-    } catch {
-      // User cancelled the share sheet — not an error.
-    }
-  };
-
-  const canNativeShare =
-    typeof navigator !== 'undefined' && 'share' in navigator;
-
   return (
-    <div className="relative flex items-center gap-3 text-neutral-mid">
+    <div className="relative flex items-center gap-3 text-neutral-dark">
       <ShareButton aria-label="Copy link" onClick={handleCopyLink}>
-        <ShareLinkIcon size={20} />
+        <ShareLinkIcon size={24} />
       </ShareButton>
       <ShareButton aria-label="Share on Twitter" onClick={handleTweet}>
-        <ShareTwitterIcon size={20} />
+        <ShareTwitterIcon size={24} />
       </ShareButton>
       <ShareButton aria-label="Share on Messenger" onClick={handleMessenger}>
-        <ShareMessengerIcon size={20} />
+        <ShareMessengerIcon size={24} />
       </ShareButton>
-      {canNativeShare ? (
-        <ShareButton aria-label="Share" onClick={handleNativeShare}>
-          <Share2 size={20} aria-hidden="true" />
-        </ShareButton>
-      ) : null}
 
       <span
         role="status"
@@ -108,7 +90,7 @@ function ShareButton({ children, className, ...props }: ShareButtonProps) {
     <button
       type="button"
       className={cn(
-        'rounded p-1 transition-colors hover:text-red-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2',
+        'rounded-full transition-colors hover:text-red-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2',
         className,
       )}
       {...props}

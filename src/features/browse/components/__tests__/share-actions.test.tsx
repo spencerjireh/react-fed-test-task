@@ -6,12 +6,10 @@ import { ShareActions } from '../share-actions';
 
 describe('ShareActions', () => {
   const writeText = vi.fn(() => Promise.resolve());
-  const share = vi.fn(() => Promise.resolve());
   let openSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     writeText.mockClear();
-    share.mockClear();
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText },
@@ -21,8 +19,6 @@ describe('ShareActions', () => {
 
   afterEach(() => {
     openSpy.mockRestore();
-    // Remove navigator.share between tests so feature-detection tests are clean.
-    Reflect.deleteProperty(navigator, 'share');
   });
 
   it('renders the three Figma share buttons with accessible labels', () => {
@@ -37,6 +33,9 @@ describe('ShareActions', () => {
     expect(
       screen.getByRole('button', { name: 'Share on Messenger' }),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Share' }),
+    ).not.toBeInTheDocument();
   });
 
   it('Link click writes the current URL to the clipboard and shows a Copied toast', async () => {
@@ -81,30 +80,5 @@ describe('ShareActions', () => {
     expect(openUrl).toBe(
       `fb-messenger://share?link=${encodeURIComponent(window.location.href)}`,
     );
-  });
-
-  it('hides the native-share button when navigator.share is unsupported', () => {
-    renderApp(<ShareActions title="Andromeda" />);
-
-    expect(
-      screen.queryByRole('button', { name: 'Share' }),
-    ).not.toBeInTheDocument();
-  });
-
-  it('renders the native-share button when navigator.share exists and wires it to navigator.share()', async () => {
-    Object.defineProperty(navigator, 'share', {
-      configurable: true,
-      value: share,
-    });
-
-    renderApp(<ShareActions title="Andromeda" />);
-
-    const nativeButton = screen.getByRole('button', { name: 'Share' });
-    await userEvent.click(nativeButton);
-
-    expect(share).toHaveBeenCalledWith({
-      title: 'Andromeda - Pet Names',
-      url: window.location.href,
-    });
   });
 });

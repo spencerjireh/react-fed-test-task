@@ -5,7 +5,7 @@ type ShareMessengerProps = Omit<SVGProps<SVGSVGElement>, 'width' | 'height'> & {
 };
 
 export function ShareMessengerIcon({
-  size = 20,
+  size = 24,
   ...props
 }: ShareMessengerProps) {
   return (
@@ -19,11 +19,8 @@ export function ShareMessengerIcon({
       {...props}
     >
       <path
-        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M12 1C18.0751 1 23 5.92486 23 12C23 18.0751 18.0751 23 12 23C5.92486 23 1 18.0751 1 12C1 5.92486 5.92486 1 12 1ZM12 5.84082C8.51953 5.84082 5.69816 8.47063 5.69824 11.7139C5.69835 13.5531 6.60579 15.1948 8.02637 16.2715V18.5L10.1533 17.3301C10.7539 17.5008 11.3756 17.5866 12 17.5859C15.4803 17.5859 18.3016 14.9569 18.3018 11.7139C18.3018 8.47063 15.4805 5.84082 12 5.84082ZM12.6699 13.6807L11.0127 12L7.92188 13.7188L11.3311 10.0879L12.9639 11.792L16.0791 10.0527L12.6699 13.6807Z"
+        fill="currentColor"
       />
     </svg>
   );

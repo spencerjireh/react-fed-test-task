@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { FilterState } from '../stores/filter-store';
-import type { MacroCategory, Name } from '../types';
-
-import { filterNames } from './filter-names';
+import type { FilterState } from '../../stores/filter-store';
+import type { MacroCategory, Name } from '../../types';
+import { filterNames } from '../filter-names';
 
 // Small fixture set for each filter branch.
 function buildName(

@@ -4,7 +4,7 @@ import {
   decodeFilterUrlParams,
   encodeFilterUrlParams,
   hasFilterUrlParams,
-} from './url-state';
+} from '../url-state';
 
 describe('encodeFilterUrlParams', () => {
   it('returns an empty string when no params are set', () => {

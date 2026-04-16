@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
-import { ShareActions } from './share-actions';
+import { ShareActions } from '../share-actions';
 
 describe('ShareActions', () => {
   const writeText = vi.fn(() => Promise.resolve());

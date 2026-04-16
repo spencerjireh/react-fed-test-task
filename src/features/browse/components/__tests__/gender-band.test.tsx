@@ -4,10 +4,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
-import { useFilterStore } from '../stores/filter-store';
-import { useFilterUrlSync } from '../stores/use-filter-url-sync';
-
-import { GenderBand } from './gender-band';
+import { useFilterStore } from '../../stores/filter-store';
+import { useFilterUrlSync } from '../../stores/use-filter-url-sync';
+import { GenderBand } from '../gender-band';
 
 function LocationProbe() {
   const location = useLocation();

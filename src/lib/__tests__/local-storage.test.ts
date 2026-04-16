@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { getJson, removeJson, setJson } from './local-storage';
+import { getJson, removeJson, setJson } from '../local-storage';
 
 afterEach(() => {
   window.localStorage.clear();

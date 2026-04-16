@@ -6,11 +6,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { server } from '@/testing/mocks/server';
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
-import { useFilterStore } from '../stores/filter-store';
-import { useFilterUrlSync } from '../stores/use-filter-url-sync';
-import type { RawName } from '../types';
-
-import { LetterStrip } from './letter-strip';
+import { useFilterStore } from '../../stores/filter-store';
+import { useFilterUrlSync } from '../../stores/use-filter-url-sync';
+import type { RawName } from '../../types';
+import { LetterStrip } from '../letter-strip';
 
 // Cover A-Z so only Ñ is disabled.
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

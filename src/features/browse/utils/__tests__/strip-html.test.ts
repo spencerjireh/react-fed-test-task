@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { stripHtml } from './strip-html';
+import { stripHtml } from '../strip-html';
 
 describe('stripHtml', () => {
   it('removes a single tag pair', () => {

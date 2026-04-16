@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { renderApp, screen } from '@/testing/test-utils';
 
-import { CoverHero } from './cover-hero';
+import { CoverHero } from '../cover-hero';
 
 describe('CoverHero', () => {
   it('renders the headline and a hero image sourced from BASE_URL', () => {

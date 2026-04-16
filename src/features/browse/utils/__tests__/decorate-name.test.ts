@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { RawName } from '../types';
-
-import { decorateName, decorateNames } from './decorate-name';
+import type { RawName } from '../../types';
+import { decorateName, decorateNames } from '../decorate-name';
 
 // Real category IDs from the fixture data.
 const CARTOON_ID = '019c8a34-3585-7249-b7c2-a4f85945291e';

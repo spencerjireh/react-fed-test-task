@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Name } from '../types';
-
-import { relatedNames } from './related';
+import type { Name } from '../../types';
+import { relatedNames } from '../related';
 
 function buildName(id: string, title: string, categories: string[] = []): Name {
   return {

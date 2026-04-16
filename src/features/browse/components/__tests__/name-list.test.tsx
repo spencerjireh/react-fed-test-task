@@ -7,11 +7,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { server } from '@/testing/mocks/server';
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
-import { useFilterStore } from '../stores/filter-store';
-import { useFilterUrlSync } from '../stores/use-filter-url-sync';
-import type { RawName } from '../types';
-
-import { NameList } from './name-list';
+import { useFilterStore } from '../../stores/filter-store';
+import { useFilterUrlSync } from '../../stores/use-filter-url-sync';
+import type { RawName } from '../../types';
+import { NameList } from '../name-list';
 
 // Virtuoso doesn't render in jsdom; stub renders items directly.
 const scrollToIndex = vi.fn();

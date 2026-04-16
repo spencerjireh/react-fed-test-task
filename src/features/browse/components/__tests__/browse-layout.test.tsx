@@ -6,10 +6,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { server } from '@/testing/mocks/server';
 import { renderApp, screen } from '@/testing/test-utils';
 
-import { useFilterStore } from '../stores/filter-store';
-import type { RawName } from '../types';
-
-import { BrowseLayout } from './browse-layout';
+import { useFilterStore } from '../../stores/filter-store';
+import type { RawName } from '../../types';
+import { BrowseLayout } from '../browse-layout';
 
 function stubMatchMedia(isDesktop: boolean) {
   Object.defineProperty(window, 'matchMedia', {

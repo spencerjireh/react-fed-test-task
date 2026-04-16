@@ -4,10 +4,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { server } from '@/testing/mocks/server';
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
-import { useFilterStore } from '../stores/filter-store';
-import type { RawCategory } from '../types';
-
-import { CategoryDropdown } from './category-dropdown';
+import { useFilterStore } from '../../stores/filter-store';
+import type { RawCategory } from '../../types';
+import { CategoryDropdown } from '../category-dropdown';
 
 const CARTOON_ID = '019c8a34-3585-7249-b7c2-a4f85945291e';
 const DISNEY_ID = '019c8a34-35f2-70b1-b866-69a4921d15a8';

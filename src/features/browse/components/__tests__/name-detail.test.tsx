@@ -4,10 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { server } from '@/testing/mocks/server';
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
-import { useFilterStore } from '../stores/filter-store';
-import type { RawName } from '../types';
-
-import { NameDetail } from './name-detail';
+import { useFilterStore } from '../../stores/filter-store';
+import type { RawName } from '../../types';
+import { NameDetail } from '../name-detail';
 
 // Overlap fixture: Andromeda (selected) shares two categories with Apollo,
 // one each with Ares and Atlas, none with Boris. Top-3 should sort by

@@ -1,10 +1,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { useFilterStore } from '../stores/filter-store';
-import type { Name } from '../types';
-
-import { useRelatedNames } from './use-related-names';
+import { useFilterStore } from '../../stores/filter-store';
+import type { Name } from '../../types';
+import { useRelatedNames } from '../use-related-names';
 
 function buildName(id: string, title: string, categories: string[] = []): Name {
   return {

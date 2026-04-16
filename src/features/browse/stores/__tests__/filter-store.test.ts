@@ -6,7 +6,7 @@ import {
   LOCAL_STORAGE_KEY,
   serializeFilterStateToUrl,
   useFilterStore,
-} from './filter-store';
+} from '../filter-store';
 
 function resetUrl(): void {
   window.history.replaceState({}, '', '/');

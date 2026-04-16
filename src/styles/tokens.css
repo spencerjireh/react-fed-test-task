@@ -1,0 +1,18 @@
+:root {
+  --color-red-main: #e81c24;
+  --color-neutral-dark: #3a3533;
+  --color-neutral-mid: #6b6868;
+  --color-neutral-light: #c9c5b9;
+  --color-cream-light: #f9f8f5;
+  --color-white: #ffffff;
+
+  --font-heading: 'Roboto Slab', serif;
+  --font-body: 'Roboto', sans-serif;
+
+  --radius-pill: 100px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  --shadow-pill:
+    0 0 2px rgba(58, 53, 51, 0.2), 0 2px 12px rgba(58, 53, 51, 0.1);
+}

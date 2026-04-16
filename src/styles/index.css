@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './tokens.css';
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto-slab/300.css';
+@import '@fontsource/roboto-slab/400.css';
+@import '@fontsource/roboto-slab/700.css';
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-neutral-dark);
+  background-color: var(--color-cream-light);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

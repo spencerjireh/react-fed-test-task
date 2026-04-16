@@ -20,12 +20,16 @@ const trigger = cva(
   [
     'flex items-center gap-2 whitespace-nowrap px-5 py-[21px]',
     'font-body text-[16px] font-light leading-[24px]',
+    'border-x border-t border-transparent',
     'text-neutral-dark transition-colors hover:text-neutral-mid',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2 focus-visible:ring-offset-white',
   ].join(' '),
   {
     variants: {
-      open: { true: 'bg-cream-light', false: '' },
+      open: {
+        true: 'relative z-10 border-red-main',
+        false: '',
+      },
       active: { true: 'font-medium', false: '' },
     },
   },
@@ -63,10 +67,16 @@ export function CategoryDropdown({
         icon={ChevronDown}
         size={24}
         className={cn(
-          'transition-transform duration-150',
+          'text-red-main transition-transform duration-150',
           isOpen && 'rotate-180',
         )}
       />
+      {isOpen && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-x-px -bottom-px h-[2px] bg-white"
+        />
+      )}
     </button>
   );
 }

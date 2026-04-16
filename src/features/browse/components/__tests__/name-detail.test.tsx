@@ -117,20 +117,19 @@ describe('NameDetail', () => {
 
   it('renders the gender glyph + macro - raw row as the first detail row', async () => {
     // Andromeda has gender ['F'] and categories [Cartoon, Disney]; Cartoon
-    // wins the alpha tiebreak. Both map to the Famous macro.
+    // wins the alpha tiebreak.
     seedHandlers();
     useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
-    const glyph = await screen.findByRole('img', { name: 'Female' });
-    expect(glyph).toHaveTextContent('\u2640');
+    await screen.findByRole('img', { name: 'Female' });
     await waitFor(() => {
-      expect(screen.getByText('Famous - Cartoon')).toBeInTheDocument();
+      expect(screen.getByText('Famous, Funny - Cartoon')).toBeInTheDocument();
     });
   });
 
-  it('shows ♂♀ when gender is empty (Marley) and still resolves macro + raw', async () => {
+  it('renders the both-genders icon when gender is empty (Marley) and still resolves macro + raw', async () => {
     const MARLEY_FIXTURE: RawName[] = [
       {
         id: 'marley-id',
@@ -145,8 +144,7 @@ describe('NameDetail', () => {
 
     renderApp(<NameDetail />);
 
-    const glyph = await screen.findByRole('img', { name: 'Male and female' });
-    expect(glyph).toHaveTextContent('\u2642\u2640');
+    await screen.findByRole('img', { name: 'Male and female' });
     await waitFor(() => {
       expect(screen.getByText('Famous - Celebrities')).toBeInTheDocument();
     });

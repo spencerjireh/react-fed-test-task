@@ -33,7 +33,6 @@ describe('GenderBand', () => {
       macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
-      page: 0,
     });
   });
 

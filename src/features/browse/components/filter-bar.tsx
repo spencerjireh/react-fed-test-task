@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { cn } from '@/lib/cn';
+
 import type { MacroCategory } from '../types';
 
 import { CategoryChecklistStrip } from './category-checklist-strip';
@@ -52,7 +54,10 @@ export function FilterBar({ initialOpenMacro = null }: FilterBarProps = {}) {
     <section
       ref={sectionRef}
       aria-label="Category filters"
-      className="md:border-y md:border-neutral-light md:bg-white"
+      className={cn(
+        'md:border-t md:border-neutral-light md:bg-white',
+        !openMacro && 'md:border-b',
+      )}
     >
       <nav className="mx-auto flex items-center md:h-[66px] md:max-w-[1440px] md:px-12 lg:px-[165px]">
         <p className="hidden shrink-0 pr-5 font-heading text-[16px] font-medium leading-[24px] text-neutral-dark md:block">

@@ -24,7 +24,6 @@ describe('FilterBar', () => {
       macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
-      page: 0,
     });
     server.use(
       http.get('*/api/categories', () =>

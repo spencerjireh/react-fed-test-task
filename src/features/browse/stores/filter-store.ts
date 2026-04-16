@@ -8,6 +8,7 @@ import {
 } from '@/lib/url-state';
 
 import type { Gender, Letter, MacroCategory } from '../types';
+import { getMacrosFor, getRawIdsForMacro } from '../utils/macro-category-map';
 
 export interface FilterState {
   gender: Gender | 'Both';
@@ -15,7 +16,6 @@ export interface FilterState {
   macroCategories: Set<MacroCategory>;
   rawCategories: Set<string>;
   selectedNameTitle: string | null;
-  page: number;
 }
 
 export interface FilterActions {
@@ -24,9 +24,9 @@ export interface FilterActions {
   toggleMacro: (macro: MacroCategory) => void;
   toggleRaw: (rawCategoryId: string) => void;
   setSelectedNameTitle: (title: string | null) => void;
-  setPage: (page: number) => void;
   clearFilters: () => void;
   goToResults: () => void;
+  goToCover: () => void;
 }
 
 export type FilterStore = FilterState & FilterActions;
@@ -59,23 +59,47 @@ const DEFAULT_STATE: FilterState = {
   macroCategories: new Set(),
   rawCategories: new Set(),
   selectedNameTitle: null,
-  page: 0,
 };
+
+function reconcileMacros(rawCategories: Set<string>): Set<MacroCategory> {
+  const next = new Set<MacroCategory>();
+  for (const macro of VALID_MACRO_CATEGORIES) {
+    const childIds = getRawIdsForMacro(macro);
+    if (childIds.length === 0) continue;
+    if (childIds.every((id) => rawCategories.has(id))) {
+      next.add(macro);
+    }
+  }
+  return next;
+}
+
+function canonicalize(
+  macroCategories: Set<MacroCategory>,
+  rawCategories: Set<string>,
+): { macroCategories: Set<MacroCategory>; rawCategories: Set<string> } {
+  const raws = new Set(rawCategories);
+  for (const macro of macroCategories) {
+    for (const id of getRawIdsForMacro(macro)) raws.add(id);
+  }
+  return { macroCategories: reconcileMacros(raws), rawCategories: raws };
+}
 
 function fromUrlParams(params: FilterUrlParams): FilterState {
   const gender: Gender | 'Both' =
     params.gender && isGender(params.gender) ? params.gender : 'Both';
   const letter =
     params.letter && isLetter(params.letter) ? params.letter : null;
+  const macros = new Set(
+    (params.macroCategories ?? []).filter(isMacroCategory),
+  );
+  const raws = new Set(params.rawCategories ?? []);
+  const synced = canonicalize(macros, raws);
   return {
     gender,
     letter,
-    macroCategories: new Set(
-      (params.macroCategories ?? []).filter(isMacroCategory),
-    ),
-    rawCategories: new Set(params.rawCategories ?? []),
+    macroCategories: synced.macroCategories,
+    rawCategories: synced.rawCategories,
     selectedNameTitle: params.selectedNameTitle ?? null,
-    page: typeof params.page === 'number' && params.page >= 0 ? params.page : 0,
   };
 }
 
@@ -98,7 +122,6 @@ export function serializeFilterStateToUrl(state: FilterState): string {
       ? [...state.rawCategories]
       : undefined,
     selectedNameTitle: state.selectedNameTitle ?? undefined,
-    page: state.page || undefined,
   });
 }
 
@@ -111,23 +134,45 @@ export const useFilterStore = create<FilterStore>((set) => ({
 
   toggleMacro: (macro) =>
     set((s) => {
-      const next = new Set(s.macroCategories);
-      if (next.has(macro)) next.delete(macro);
-      else next.add(macro);
-      return { macroCategories: next };
+      const childIds = getRawIdsForMacro(macro);
+      const fullyChecked =
+        s.macroCategories.has(macro) &&
+        childIds.every((id) => s.rawCategories.has(id));
+
+      const nextMacros = new Set(s.macroCategories);
+      const nextRaws = new Set(s.rawCategories);
+
+      if (fullyChecked) {
+        nextMacros.delete(macro);
+        for (const id of childIds) nextRaws.delete(id);
+      } else {
+        nextMacros.add(macro);
+        for (const id of childIds) nextRaws.add(id);
+      }
+
+      return { macroCategories: nextMacros, rawCategories: nextRaws };
     }),
 
   toggleRaw: (rawCategoryId) =>
     set((s) => {
-      const next = new Set(s.rawCategories);
-      if (next.has(rawCategoryId)) next.delete(rawCategoryId);
-      else next.add(rawCategoryId);
-      return { rawCategories: next };
+      const nextRaws = new Set(s.rawCategories);
+      if (nextRaws.has(rawCategoryId)) nextRaws.delete(rawCategoryId);
+      else nextRaws.add(rawCategoryId);
+
+      const nextMacros = new Set(s.macroCategories);
+      for (const macro of getMacrosFor(rawCategoryId)) {
+        const childIds = getRawIdsForMacro(macro);
+        if (childIds.length > 0 && childIds.every((id) => nextRaws.has(id))) {
+          nextMacros.add(macro);
+        } else {
+          nextMacros.delete(macro);
+        }
+      }
+
+      return { macroCategories: nextMacros, rawCategories: nextRaws };
     }),
 
   setSelectedNameTitle: (selectedNameTitle) => set({ selectedNameTitle }),
-
-  setPage: (page) => set({ page }),
 
   clearFilters: () =>
     set({
@@ -135,9 +180,18 @@ export const useFilterStore = create<FilterStore>((set) => ({
       letter: null,
       macroCategories: new Set(),
       rawCategories: new Set(),
-      page: 0,
     }),
 
   // One set() so the URL only navigates once (no ?g=M flash before ?l=A).
   goToResults: () => set({ gender: 'M', letter: 'A' }),
+
+  // Like clearFilters, but also drops selectedNameTitle so the URL goes bare.
+  goToCover: () =>
+    set({
+      gender: 'Both',
+      letter: null,
+      macroCategories: new Set(),
+      rawCategories: new Set(),
+      selectedNameTitle: null,
+    }),
 }));

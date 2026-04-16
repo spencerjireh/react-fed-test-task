@@ -37,7 +37,6 @@ function Framed({ macro, macros, raws }: FramedProps) {
       macroCategories: macros,
       rawCategories: raws,
       selectedNameTitle: null,
-      page: 0,
     });
   }, [macros, raws]);
 

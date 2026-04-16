@@ -27,7 +27,6 @@ describe('CategoryChecklistStrip', () => {
       macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
-      page: 0,
     });
     server.use(
       http.get('*/api/categories', () =>
@@ -79,6 +78,59 @@ describe('CategoryChecklistStrip', () => {
         true,
       ),
     );
+  });
+
+  it('clicking "All Famous" also pulls every visible child raw into the store', async () => {
+    renderApp(<CategoryChecklistStrip macro="Famous" />);
+
+    await userEvent.click(
+      await screen.findByRole('checkbox', { name: 'All Famous' }),
+    );
+
+    for (const name of ['Cartoon', 'Disney', 'Literary']) {
+      const box = await screen.findByRole('checkbox', { name });
+      await waitFor(() => expect(box).toBeChecked());
+    }
+  });
+
+  it('clicking "All Famous" again clears the children back off', async () => {
+    renderApp(<CategoryChecklistStrip macro="Famous" />);
+
+    const allFamous = await screen.findByRole('checkbox', {
+      name: 'All Famous',
+    });
+    await userEvent.click(allFamous);
+    await userEvent.click(allFamous);
+
+    for (const name of ['Cartoon', 'Disney', 'Literary']) {
+      const box = await screen.findByRole('checkbox', { name });
+      await waitFor(() => expect(box).not.toBeChecked());
+    }
+  });
+
+  it('renders "All Famous" as indeterminate when only some children are checked', async () => {
+    useFilterStore.setState({
+      rawCategories: new Set([CARTOON_ID]),
+    });
+    renderApp(<CategoryChecklistStrip macro="Famous" />);
+
+    const allFamous = await screen.findByRole('checkbox', {
+      name: 'All Famous',
+    });
+    await waitFor(() => expect(allFamous).toBePartiallyChecked());
+  });
+
+  it('flips "All Famous" to checked once every visible raw is ticked individually', async () => {
+    renderApp(<CategoryChecklistStrip macro="Famous" />);
+
+    for (const name of ['Cartoon', 'Disney', 'Literary']) {
+      await userEvent.click(await screen.findByRole('checkbox', { name }));
+    }
+
+    const allFamous = await screen.findByRole('checkbox', {
+      name: 'All Famous',
+    });
+    await waitFor(() => expect(allFamous).toBeChecked());
   });
 
   it('clicking a raw checkbox toggles that raw id in the store', async () => {

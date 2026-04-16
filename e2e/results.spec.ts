@@ -72,4 +72,16 @@ test.describe('Results state', () => {
     await expect(page.locator('[data-browse-state="results"]')).toBeVisible();
     await expect(page.getByTestId('results-puppy-img')).toBeVisible();
   });
+
+  test('clicking the Results photo returns to Cover with a bare URL', async ({
+    page,
+  }) => {
+    await page.goto('/?l=A&g=M');
+    await expect(page.locator('[data-browse-state="results"]')).toBeVisible();
+
+    await page.getByRole('button', { name: /return to cover/i }).click();
+
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator('[data-browse-state="cover"]')).toBeVisible();
+  });
 });

@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { Check, Minus } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { cn } from '@/lib/cn';
 
@@ -12,7 +13,6 @@ interface CategoryChecklistStripProps {
 }
 
 export function CategoryChecklistStrip({ macro }: CategoryChecklistStripProps) {
-  const macroCategories = useFilterStore((s) => s.macroCategories);
   const rawCategories = useFilterStore((s) => s.rawCategories);
   const toggleMacro = useFilterStore((s) => s.toggleMacro);
   const toggleRaw = useFilterStore((s) => s.toggleRaw);
@@ -23,28 +23,36 @@ export function CategoryChecklistStrip({ macro }: CategoryChecklistStripProps) {
     [macro, categories],
   );
 
-  const macroChecked = macroCategories.has(macro);
+  const checkedCount = raws.reduce(
+    (acc, r) => (rawCategories.has(r.id) ? acc + 1 : acc),
+    0,
+  );
+  const fullyChecked = raws.length > 0 && checkedCount === raws.length;
+  const partiallyChecked = checkedCount > 0 && !fullyChecked;
 
   return (
-    <div
-      id="category-checklist-strip"
-      role="group"
-      aria-label={`${macro} categories`}
-      className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4 md:px-12 lg:px-[165px]"
-    >
-      <ChecklistItem
-        label={`All ${macro}`}
-        checked={macroChecked}
-        onChange={() => toggleMacro(macro)}
-      />
-      {raws.map((raw) => (
+    <div className="border-t border-neutral-light">
+      <div
+        id="category-checklist-strip"
+        role="group"
+        aria-label={`${macro} categories`}
+        className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4 md:px-12 lg:px-[165px]"
+      >
         <ChecklistItem
-          key={raw.id}
-          label={raw.name}
-          checked={rawCategories.has(raw.id)}
-          onChange={() => toggleRaw(raw.id)}
+          label={`All ${macro}`}
+          checked={fullyChecked}
+          indeterminate={partiallyChecked}
+          onChange={() => toggleMacro(macro)}
         />
-      ))}
+        {raws.map((raw) => (
+          <ChecklistItem
+            key={raw.id}
+            label={raw.name}
+            checked={rawCategories.has(raw.id)}
+            onChange={() => toggleRaw(raw.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -52,25 +60,58 @@ export function CategoryChecklistStrip({ macro }: CategoryChecklistStripProps) {
 interface ChecklistItemProps {
   label: string;
   checked: boolean;
+  indeterminate?: boolean;
   onChange: () => void;
 }
 
-function ChecklistItem({ label, checked, onChange }: ChecklistItemProps) {
+function ChecklistItem({
+  label,
+  checked,
+  indeterminate = false,
+  onChange,
+}: ChecklistItemProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.indeterminate = indeterminate;
+  }, [indeterminate]);
+
   return (
     <label
       className={cn(
         'inline-flex cursor-pointer items-center gap-2 whitespace-nowrap',
         'font-body text-[16px] font-light leading-[24px]',
-        'transition-colors',
-        checked ? 'text-red-main' : 'text-neutral-dark hover:text-neutral-mid',
+        'text-neutral-dark transition-colors hover:text-neutral-mid',
       )}
     >
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={onChange}
-        className="size-4 cursor-pointer accent-red-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2"
-      />
+      <span className="relative inline-flex size-4 shrink-0 items-center justify-center">
+        <input
+          ref={inputRef}
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          className={cn(
+            'absolute inset-0 m-0 cursor-pointer appearance-none rounded-[2px] border border-red-main bg-white transition-colors',
+            'checked:bg-red-main',
+            indeterminate && 'bg-red-main',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2',
+          )}
+        />
+        {indeterminate ? (
+          <Minus
+            aria-hidden
+            size={12}
+            strokeWidth={3}
+            className="pointer-events-none relative shrink-0 text-white"
+          />
+        ) : checked ? (
+          <Check
+            aria-hidden
+            size={12}
+            strokeWidth={3}
+            className="pointer-events-none relative shrink-0 text-white"
+          />
+        ) : null}
+      </span>
       <span>{label}</span>
     </label>
   );

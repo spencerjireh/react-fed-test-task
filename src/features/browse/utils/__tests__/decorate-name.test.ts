@@ -33,21 +33,22 @@ describe('decorateName', () => {
     expect(name.definitionText).toBe('Line oneLine two');
   });
 
-  it('maps raw categories to macro categories via the map', () => {
+  it('collects every macro each raw belongs to (Cartoon sits under both Famous and Funny)', () => {
     const name = decorateName(
       buildRaw({ categories: [CARTOON_ID, CELEBRITIES_ID] }),
     );
-    expect(name.macroCategories).toEqual(['Famous']);
+    expect(new Set(name.macroCategories)).toEqual(new Set(['Famous', 'Funny']));
+    expect(name.macroCategories).toHaveLength(2);
   });
 
-  it('dedupes macro categories when multiple raws share a macro', () => {
+  it('dedupes macros when several raws share one (Short Names lives under Others per the taxonomy)', () => {
     const name = decorateName(
       buildRaw({ categories: [CARTOON_ID, CELEBRITIES_ID, SHORT_NAMES_ID] }),
     );
     expect(new Set(name.macroCategories)).toEqual(
-      new Set(['Famous', "Pet's size"]),
+      new Set(['Famous', 'Funny', 'Others']),
     );
-    expect(name.macroCategories).toHaveLength(2);
+    expect(name.macroCategories).toHaveLength(3);
   });
 
   it("falls through unmapped raw category IDs to 'Others'", () => {

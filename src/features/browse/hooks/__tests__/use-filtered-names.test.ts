@@ -68,7 +68,7 @@ describe('useFilteredNames', () => {
     const first = result.current;
 
     act(() => useFilterStore.getState().setSelectedNameTitle('a'));
-    act(() => useFilterStore.getState().setPage(3));
+    act(() => useFilterStore.getState().setSelectedNameTitle('b'));
     rerender();
 
     expect(result.current).toBe(first);

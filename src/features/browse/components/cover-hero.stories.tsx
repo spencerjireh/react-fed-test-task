@@ -18,12 +18,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Desktop: Story = {};
+export const Default: Story = {};
 
-export const Tablet: Story = {
-  globals: { viewport: { value: 'tablet' } },
-};
-
-export const Mobile: Story = {
+export const Narrow: Story = {
   globals: { viewport: { value: 'mobile1' } },
 };

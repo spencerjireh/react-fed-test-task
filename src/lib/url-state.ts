@@ -4,7 +4,6 @@ export interface FilterUrlParams {
   macroCategories?: string[];
   rawCategories?: string[];
   selectedNameTitle?: string;
-  page?: number;
 }
 
 // Short query-string keys used by the browse filters.
@@ -14,7 +13,6 @@ const KEYS = {
   macroCategories: 'mc',
   rawCategories: 'rc',
   selectedNameTitle: 'n',
-  page: 'p',
 } as const;
 
 /** Recognized filter-state keys in a URL. */
@@ -33,9 +31,6 @@ export function encodeFilterUrlParams(params: FilterUrlParams): string {
   }
   if (params.selectedNameTitle)
     search.set(KEYS.selectedNameTitle, params.selectedNameTitle);
-  if (params.page !== undefined && params.page > 0) {
-    search.set(KEYS.page, String(params.page));
-  }
   return search.toString();
 }
 
@@ -67,12 +62,6 @@ export function decodeFilterUrlParams(
 
   const n = search.get(KEYS.selectedNameTitle);
   if (n) result.selectedNameTitle = n;
-
-  const p = search.get(KEYS.page);
-  if (p !== null) {
-    const parsed = Number.parseInt(p, 10);
-    if (Number.isFinite(parsed) && parsed >= 0) result.page = parsed;
-  }
 
   return result;
 }

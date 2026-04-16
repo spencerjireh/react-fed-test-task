@@ -71,7 +71,6 @@ describe('BrowseLayout', () => {
       macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
-      page: 0,
     });
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
@@ -82,7 +81,7 @@ describe('BrowseLayout', () => {
     stubMatchMedia(true);
     renderApp(<BrowseLayout />);
 
-    expect(await screen.findByText(/I NEED\s+A NAME/)).toBeInTheDocument();
+    expect(await screen.findByText('I NEED')).toBeInTheDocument();
     expect(
       screen.queryByRole('region', { name: 'Selected name details' }),
     ).not.toBeInTheDocument();
@@ -97,7 +96,7 @@ describe('BrowseLayout', () => {
     expect(
       await screen.findByRole('region', { name: 'Selected name details' }),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/I NEED\s+A NAME/)).not.toBeInTheDocument();
+    expect(screen.queryByText('I NEED')).not.toBeInTheDocument();
   });
 
   it('wraps the filter chrome in a navigation landmark', async () => {

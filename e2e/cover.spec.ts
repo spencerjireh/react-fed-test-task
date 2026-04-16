@@ -10,8 +10,8 @@ test.describe('Cover V1', () => {
   }) => {
     await page.goto('/');
 
-    // Two spaces between NEED and A — matches the JSX.
-    await expect(page.getByText('I NEED  A NAME')).toBeVisible();
+    await expect(page.getByText('I NEED', { exact: true })).toBeVisible();
+    await expect(page.getByText('A NAME', { exact: true })).toBeVisible();
     await expect(page.getByTestId('cover-hero-img')).toBeVisible();
 
     await expect(
@@ -34,7 +34,8 @@ test.describe('Cover V1', () => {
   }) => {
     await page.goto('/?n=NoSuchName');
 
-    await expect(page.getByText('I NEED  A NAME')).toBeVisible();
+    await expect(page.getByText('I NEED', { exact: true })).toBeVisible();
+    await expect(page.getByText('A NAME', { exact: true })).toBeVisible();
     await expect(
       page.getByRole('region', { name: /selected name details/i }),
     ).toHaveCount(0);

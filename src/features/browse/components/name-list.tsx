@@ -16,7 +16,7 @@ import { NameListItem } from './name-list-item';
 
 interface NameListProps {
   chevronSide?: 'left' | 'right';
-  centerEffect?: boolean;
+  variant?: 'detail' | 'results';
 }
 
 function focusByTitle(title: string) {
@@ -27,19 +27,23 @@ function focusByTitle(title: string) {
 
 export function NameList({
   chevronSide = 'left',
-  centerEffect = false,
+  variant = 'detail',
 }: NameListProps = {}) {
+  const centerEffect = variant === 'results';
   const { data: names, isPending, isError } = useNames();
   const filtered = useFilteredNames(names ?? []);
 
   const selectedNameTitle = useFilterStore((s) => s.selectedNameTitle);
   const setSelectedNameTitle = useFilterStore((s) => s.setSelectedNameTitle);
-  const page = useFilterStore((s) => s.page);
-  const setPage = useFilterStore((s) => s.setPage);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const listHeight = isDesktop ? VIEWPORT_HEIGHT : '70vh';
+
+  const [atTop, setAtTop] = useState(true);
+  const [atBottom, setAtBottom] = useState(false);
+
+  const lastRange = useRef<ListRange>({ startIndex: 0, endIndex: 0 });
 
   // Seed 0 so the first paint centers before rangeChanged fires.
   const [centerIndex, setCenterIndex] = useState(0);
@@ -58,25 +62,29 @@ export function NameList({
     );
   }
 
-  const maxPage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1);
+  const anchor = selectedNameTitle
+    ? Math.max(
+        0,
+        filtered.findIndex((n) => n.title === selectedNameTitle),
+      )
+    : 0;
 
-  const handleRangeChanged = ({ startIndex, endIndex }: ListRange) => {
-    // Near the end of a short list, Virtuoso may clamp the start index.
-    // Use `endIndex` so the last page still resolves to `maxPage`.
-    const atEnd = endIndex >= filtered.length - 1 && filtered.length > 0;
-    const next = atEnd ? maxPage : Math.floor(startIndex / PAGE_SIZE);
-    if (next !== page) setPage(next);
+  const handleRangeChanged = (range: ListRange) => {
+    lastRange.current = range;
 
     if (centerEffect && filtered.length > 0) {
-      const clampedEnd = Math.min(endIndex, filtered.length - 1);
-      setCenterIndex(Math.floor((startIndex + clampedEnd) / 2));
+      const clampedEnd = Math.min(range.endIndex, filtered.length - 1);
+      setCenterIndex(Math.floor((range.startIndex + clampedEnd) / 2));
     }
   };
 
-  const goToPage = (n: number) => {
-    const clamped = Math.max(0, Math.min(n, maxPage));
+  const jumpBy = (delta: number) => {
+    const target = Math.max(
+      0,
+      Math.min(filtered.length - 1, lastRange.current.startIndex + delta),
+    );
     virtuosoRef.current?.scrollToIndex({
-      index: clamped * PAGE_SIZE,
+      index: target,
       align: 'start',
       behavior: 'smooth',
     });
@@ -112,18 +120,20 @@ export function NameList({
       data-chevron-side={chevronSide}
     >
       <ChevronPair
-        page={page}
-        maxPage={maxPage}
-        onPrev={() => goToPage(page - 1)}
-        onNext={() => goToPage(page + 1)}
+        atTop={atTop}
+        atBottom={atBottom}
+        onPrev={() => jumpBy(-PAGE_SIZE)}
+        onNext={() => jumpBy(PAGE_SIZE)}
       />
       <Virtuoso
         ref={virtuosoRef}
         data={filtered}
-        initialTopMostItemIndex={page * PAGE_SIZE}
+        initialTopMostItemIndex={anchor}
         rangeChanged={handleRangeChanged}
+        atTopStateChange={setAtTop}
+        atBottomStateChange={setAtBottom}
         style={{ height: listHeight }}
-        className="w-full"
+        className="scrollbar-none w-full"
         aria-label="Pet names"
         onKeyDown={handleKeyDown}
         itemContent={(index, name) => (
@@ -132,6 +142,7 @@ export function NameList({
             isSelected={name.title === selectedNameTitle}
             onSelect={setSelectedNameTitle}
             centerDistance={centerEffect ? Math.abs(index - centerIndex) : null}
+            variant={variant}
           />
         )}
       />

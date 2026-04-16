@@ -2,15 +2,15 @@ import { ChevronButton } from '@/components/ui/chevron-button';
 import { VIEWPORT_HEIGHT } from '@/config/constants';
 
 interface ChevronPairProps {
-  page: number;
-  maxPage: number;
+  atTop: boolean;
+  atBottom: boolean;
   onPrev: () => void;
   onNext: () => void;
 }
 
 export function ChevronPair({
-  page,
-  maxPage,
+  atTop,
+  atBottom,
   onPrev,
   onNext,
 }: ChevronPairProps) {
@@ -21,13 +21,13 @@ export function ChevronPair({
     >
       <ChevronButton
         direction="up"
-        disabled={page <= 0}
+        disabled={atTop}
         onClick={onPrev}
         aria-label="Previous 11 names"
       />
       <ChevronButton
         direction="down"
-        disabled={page >= maxPage}
+        disabled={atBottom}
         onClick={onNext}
         aria-label="Next 11 names"
       />

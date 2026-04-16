@@ -14,7 +14,6 @@ function Framed({ initialGender }: { initialGender: Gender | 'Both' }) {
       macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
-      page: 0,
     });
   }, [initialGender]);
   return <GenderBand />;

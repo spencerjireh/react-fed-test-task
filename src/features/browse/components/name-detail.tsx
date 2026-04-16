@@ -50,7 +50,7 @@ export function NameDetail() {
     <section
       aria-live="polite"
       aria-label="Selected name details"
-      className="flex flex-col gap-4 font-body text-neutral-dark"
+      className="flex flex-col font-body text-neutral-dark md:h-full"
     >
       {/* Blank titleTemplate drops the outer "| Pet Name Finder" suffix. */}
       <Helmet titleTemplate="%s" title={`${current.title} - Pet Names`} />
@@ -60,20 +60,22 @@ export function NameDetail() {
         initial={reduce ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={transition}
-        className="flex flex-col gap-4"
+        className="flex flex-1 flex-col justify-center gap-6"
       >
         <GenderMacroRow name={current} />
 
-        <p className="text-[20px] font-light leading-[30px] lg:text-[30px] lg:leading-[55px]">
+        <hr className="border-neutral-light" />
+
+        <p className="text-[18px] font-light leading-[28px] lg:text-[26px] lg:leading-[44px]">
           {current.definitionText}
         </p>
 
         <hr className="border-neutral-light" />
 
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[20px] text-neutral-dark">Related name</p>
-            <p className="text-[20px] font-light text-neutral-mid">
+        <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-col gap-3">
+            <p className="text-[16px] text-neutral-dark">Related name</p>
+            <p className="text-[16px] font-light text-neutral-mid">
               {related.length
                 ? related.map((r) => r.title).join(' - ')
                 : '\u2014'}

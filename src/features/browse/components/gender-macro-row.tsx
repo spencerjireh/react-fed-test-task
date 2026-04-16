@@ -1,23 +1,26 @@
+import { type LucideIcon, Mars, Venus, VenusAndMars } from 'lucide-react';
 import { useMemo } from 'react';
+
+import { Icon } from '@/components/ui/icon';
 
 import { useCategories } from '../api/get-categories';
 import type { Name } from '../types';
-import { getMacroFor } from '../utils/macro-category-map';
+import { getMacrosFor } from '../utils/macro-category-map';
 
 interface GenderMacroRowProps {
   name: Name;
 }
 
 // Empty gender array (Marley) is treated as both, matching the filter predicate.
-function glyphForGender(gender: Name['gender']): {
-  symbol: string;
+function iconForGender(gender: Name['gender']): {
+  icon: LucideIcon;
   label: string;
 } {
   const isMale = gender.includes('M');
   const isFemale = gender.includes('F');
-  if (isMale && !isFemale) return { symbol: '\u2642', label: 'Male' };
-  if (isFemale && !isMale) return { symbol: '\u2640', label: 'Female' };
-  return { symbol: '\u2642\u2640', label: 'Male and female' };
+  if (isMale && !isFemale) return { icon: Mars, label: 'Male' };
+  if (isFemale && !isMale) return { icon: Venus, label: 'Female' };
+  return { icon: VenusAndMars, label: 'Male and female' };
 }
 
 export function GenderMacroRow({ name }: GenderMacroRowProps) {
@@ -30,16 +33,14 @@ export function GenderMacroRow({ name }: GenderMacroRowProps) {
     return mine.slice().sort((a, b) => a.name.localeCompare(b.name))[0];
   }, [allCategories, name.categories]);
 
-  const { symbol, label } = glyphForGender(name.gender);
+  const { icon, label } = iconForGender(name.gender);
 
   return (
-    <p className="flex items-center gap-2 font-body text-[20px] leading-[30px] text-neutral-dark">
-      <span aria-label={label} role="img" className="text-[24px] leading-none">
-        {symbol}
-      </span>
+    <p className="flex items-center gap-3 font-body text-[26px] leading-[34px] text-neutral-dark">
+      <Icon icon={icon} size={48} aria-label={label} />
       {firstRaw ? (
         <span>
-          {getMacroFor(firstRaw.id)} - {firstRaw.name}
+          {getMacrosFor(firstRaw.id).join(', ')} - {firstRaw.name}
         </span>
       ) : null}
     </p>

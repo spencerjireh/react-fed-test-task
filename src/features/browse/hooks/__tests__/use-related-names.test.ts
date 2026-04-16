@@ -57,7 +57,7 @@ describe('useRelatedNames', () => {
     const { result, rerender } = renderHook(() => useRelatedNames());
     act(() => useFilterStore.getState().setSelectedNameTitle('Andromeda'));
     const first = result.current;
-    act(() => useFilterStore.getState().setPage(5));
+    act(() => useFilterStore.getState().setLetter('Z'));
     act(() => useFilterStore.getState().setGender('F'));
     rerender();
     expect(result.current).toBe(first);

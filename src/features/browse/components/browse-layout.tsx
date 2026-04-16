@@ -42,7 +42,7 @@ export function BrowseLayout() {
         data-browse-state={state}
         className="mx-auto max-w-[1440px] px-6 py-10 md:px-[48px] xl:px-[165px] xl:py-[40px]"
       >
-        <h1 className="font-heading text-[30px] leading-[36px] text-neutral-dark">
+        <h1 className="font-heading text-[22px] leading-[28px] text-neutral-dark">
           All pets names
         </h1>
 

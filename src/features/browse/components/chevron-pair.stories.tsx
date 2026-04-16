@@ -23,17 +23,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Middle: Story = {
-  args: { page: 5, maxPage: 10 },
+  args: { atTop: false, atBottom: false },
 };
 
 export const TopBound: Story = {
-  args: { page: 0, maxPage: 10 },
+  args: { atTop: true, atBottom: false },
 };
 
 export const BottomBound: Story = {
-  args: { page: 10, maxPage: 10 },
+  args: { atTop: false, atBottom: true },
 };
 
 export const NothingToPaginate: Story = {
-  args: { page: 0, maxPage: 0 },
+  args: { atTop: true, atBottom: true },
 };

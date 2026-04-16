@@ -5,7 +5,13 @@ import { useLocation } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
-import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
+import {
+  act,
+  renderApp,
+  screen,
+  userEvent,
+  waitFor,
+} from '@/testing/test-utils';
 
 import { useFilterStore } from '../../stores/filter-store';
 import { useFilterUrlSync } from '../../stores/use-filter-url-sync';
@@ -17,7 +23,11 @@ const scrollToIndex = vi.fn();
 const scrollIntoView = vi.fn((opts: { index: number; done?: () => void }) =>
   opts.done?.(),
 );
-const captured = { initialTopMostItemIndex: undefined as number | undefined };
+const captured = {
+  initialTopMostItemIndex: undefined as number | undefined,
+  atTopStateChange: undefined as ((value: boolean) => void) | undefined,
+  atBottomStateChange: undefined as ((value: boolean) => void) | undefined,
+};
 
 interface StubVirtuosoProps<T> {
   ref?: Ref<{
@@ -28,6 +38,9 @@ interface StubVirtuosoProps<T> {
   itemContent: (index: number, item: T) => ReactNode;
   initialTopMostItemIndex?: number;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+  atTopStateChange?: (value: boolean) => void;
+  atBottomStateChange?: (value: boolean) => void;
+  className?: string;
 }
 
 vi.mock('react-virtuoso', () => ({
@@ -37,12 +50,17 @@ vi.mock('react-virtuoso', () => ({
     itemContent,
     initialTopMostItemIndex,
     onKeyDown,
+    atTopStateChange,
+    atBottomStateChange,
+    className,
   }: StubVirtuosoProps<T>) => {
     captured.initialTopMostItemIndex = initialTopMostItemIndex;
+    captured.atTopStateChange = atTopStateChange;
+    captured.atBottomStateChange = atBottomStateChange;
     useImperativeHandle(ref, () => ({ scrollToIndex, scrollIntoView }), []);
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-      <div data-testid="virtuoso" onKeyDown={onKeyDown}>
+      <div data-testid="virtuoso" className={className} onKeyDown={onKeyDown}>
         {data.map((item, i) => (
           <div key={i}>{itemContent(i, item)}</div>
         ))}
@@ -85,13 +103,14 @@ describe('NameList', () => {
     scrollToIndex.mockClear();
     scrollIntoView.mockClear();
     captured.initialTopMostItemIndex = undefined;
+    captured.atTopStateChange = undefined;
+    captured.atBottomStateChange = undefined;
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
       macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
-      page: 0,
     });
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
@@ -129,15 +148,34 @@ describe('NameList', () => {
     ).toBeInTheDocument();
   });
 
-  it('up chevron is disabled at page 0 and down chevron advances to index 11', async () => {
+  it('up chevron starts disabled and enables when atTopStateChange(false) fires', async () => {
     renderApp(<Harness />);
     await screen.findByRole('button', { name: 'A00' });
 
     const up = screen.getByRole('button', { name: 'Previous 11 names' });
-    const down = screen.getByRole('button', { name: 'Next 11 names' });
     expect(up).toBeDisabled();
+
+    act(() => captured.atTopStateChange?.(false));
+    expect(up).toBeEnabled();
+  });
+
+  it('down chevron disables when atBottomStateChange(true) fires', async () => {
+    renderApp(<Harness />);
+    await screen.findByRole('button', { name: 'A00' });
+
+    const down = screen.getByRole('button', { name: 'Next 11 names' });
     expect(down).toBeEnabled();
 
+    act(() => captured.atBottomStateChange?.(true));
+    expect(down).toBeDisabled();
+  });
+
+  it('clicking down jumps PAGE_SIZE items past the latest visible startIndex', async () => {
+    renderApp(<Harness />);
+    await screen.findByRole('button', { name: 'A00' });
+
+    act(() => captured.atTopStateChange?.(false));
+    const down = screen.getByRole('button', { name: 'Next 11 names' });
     await userEvent.click(down);
 
     expect(scrollToIndex).toHaveBeenCalledWith({
@@ -147,23 +185,27 @@ describe('NameList', () => {
     });
   });
 
-  it('down chevron is disabled at the last page', async () => {
-    useFilterStore.setState({ page: 2 });
+  it('initialTopMostItemIndex anchors to selectedNameTitle when set', async () => {
+    useFilterStore.setState({ selectedNameTitle: 'X23' });
     renderApp(<Harness />);
-    await screen.findByRole('button', { name: 'A00' });
 
-    const up = screen.getByRole('button', { name: 'Previous 11 names' });
-    const down = screen.getByRole('button', { name: 'Next 11 names' });
-    expect(down).toBeDisabled();
-    expect(up).toBeEnabled();
+    await screen.findByRole('button', { name: 'A00' });
+    expect(captured.initialTopMostItemIndex).toBe(23);
   });
 
-  it('hydrates initialTopMostItemIndex from store.page', async () => {
-    useFilterStore.setState({ page: 2 });
+  it('initialTopMostItemIndex falls back to 0 when selectedNameTitle is unknown', async () => {
+    useFilterStore.setState({ selectedNameTitle: 'NoSuchName' });
     renderApp(<Harness />);
 
     await screen.findByRole('button', { name: 'A00' });
-    expect(captured.initialTopMostItemIndex).toBe(22);
+    expect(captured.initialTopMostItemIndex).toBe(0);
+  });
+
+  it('Virtuoso list uses the scrollbar-none utility', async () => {
+    renderApp(<Harness />);
+
+    const virtuoso = await screen.findByTestId('virtuoso');
+    expect(virtuoso).toHaveClass('scrollbar-none');
   });
 
   it('ArrowDown on a focused list item moves focus to the next item', async () => {
@@ -225,29 +267,27 @@ describe('NameList', () => {
     expect(wrapper).not.toHaveClass('flex-row-reverse');
   });
 
-  it('centerEffect renders filtered[0] as the focal item on first paint', async () => {
+  it('variant="results" makes filtered[0] the centered red focal and renders neighbors as plain larger rows', async () => {
     renderApp(
       <Harness>
-        <NameList centerEffect />
+        <NameList variant="results" />
       </Harness>,
     );
 
-    // filtered[0] = "A00" → focal (red, large); index 1 (B01) is one step
-    // away → scale 0.88, opacity 0.85; index 2 (C02) is two steps → scale 0.76.
     const first = await screen.findByRole('button', { name: 'A00' });
     expect(first).toHaveClass('text-red-main');
-    expect(first).toHaveClass('md:text-[45px]');
+    expect(first).toHaveClass('text-center');
+    expect(first).toHaveClass('md:text-[64px]');
 
     const second = screen.getByRole('button', { name: 'B01' });
-    expect(second).toHaveStyle({
-      transform: 'scale(0.88)',
-      opacity: '0.85',
-    });
+    expect(second).toHaveClass('text-center');
+    expect(second).toHaveClass('md:text-[48px]');
+    expect(second).not.toHaveClass('text-red-main');
+    expect(second).not.toHaveAttribute('style');
 
     const third = screen.getByRole('button', { name: 'C02' });
-    expect(third).toHaveStyle({
-      transform: 'scale(0.76)',
-      opacity: '0.7',
-    });
+    expect(third).toHaveClass('text-center');
+    expect(third).toHaveClass('md:text-[48px]');
+    expect(third).not.toHaveAttribute('style');
   });
 });

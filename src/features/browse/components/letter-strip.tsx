@@ -69,7 +69,7 @@ export function LetterStrip() {
       aria-label="Filter by letter"
       onKeyDown={handleKeyDown}
       tabIndex={-1}
-      className="flex flex-wrap items-center justify-center gap-[3px] rounded-pill bg-white p-3 shadow-pill md:p-4"
+      className="mx-auto flex w-fit flex-wrap items-center justify-center gap-1 rounded-pill bg-white p-1.5 shadow-pill md:flex-nowrap md:p-2"
     >
       {letters.map((l, i) => (
         <LetterCircle

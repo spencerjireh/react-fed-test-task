@@ -140,7 +140,6 @@ describe('round-trip', () => {
 
   it('round-trips a title with a non-ASCII accent', () => {
     const encoded = encodeFilterUrlParams({ selectedNameTitle: 'Xiáng' });
-    // URL-encoded bytes, but decode-symmetric with the input.
     expect(encoded).toContain('%C3%A1');
     expect(decodeFilterUrlParams(encoded).selectedNameTitle).toBe('Xiáng');
   });

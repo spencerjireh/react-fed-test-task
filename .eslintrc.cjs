@@ -120,9 +120,8 @@ module.exports = {
       },
     },
     {
-      // Unit / integration tests under src/ use React Testing Library + jest-dom
-      // matchers. Scoped here so the rules don't fire against Playwright code
-      // under e2e/, whose locator API accidentally shares method names with RTL.
+      // RTL + jest-dom rule names collide with Playwright's locator API,
+      // so scope them to src/ only.
       files: ['src/**/*.{ts,tsx}'],
       extends: [
         'plugin:testing-library/react',
@@ -130,18 +129,12 @@ module.exports = {
       ],
     },
     {
-      // Playwright specs: use the dedicated plugin. It knows that
-      // `async ({}, testInfo) =>` is fixture-destructuring, that `page.getByRole`
-      // is a locator (not an RTL destructured query), and it adds its own rules
-      // for Playwright-specific bugs (missing await on expect, .only committed,
-      // duplicate test titles).
       files: ['e2e/**/*.ts'],
       extends: ['plugin:playwright/recommended'],
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
-        // We use `test.skip(testInfo.project.name !== 'X', 'reason')` in
-        // beforeEach for project-level gating (desktop-only vs mobile-only
-        // specs). That's a deliberate routing pattern, not a flagged skip.
+        // beforeEach gates specs on `testInfo.project.name` — those skips
+        // are deliberate routing, not quarantine.
         'playwright/no-skipped-test': 'off',
       },
     },

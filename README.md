@@ -47,6 +47,26 @@ Both query the same `@mswjs/data` in-memory DB seeded once from
 `enableMocking()` so the first `useQuery` always sees an intercepted
 response.
 
+```mermaid
+flowchart TB
+    JSON[public/data/*.json<br/>names · categories · letters]
+    DB["@mswjs/data<br/>in-memory DB factory"]
+    H[handlers.ts]
+
+    JSON -->|seed on first call| DB
+    DB --> H
+
+    H --> SW[Service Worker<br/>mocks/browser.ts]
+    H --> Node[msw/node server<br/>mocks/server.ts]
+
+    SW -.intercepts fetch.-> Dev[npm run dev<br/>Storybook<br/>Playwright E2E]
+    Node -.intercepts fetch.-> Vitest[Vitest unit/integration]
+
+    style JSON fill:#f4f4f0,stroke:#999
+    style DB fill:#fff,stroke:#666
+    style H fill:#fff,stroke:#666,stroke-width:2px
+```
+
 **URL is the source of truth.** All filter state (gender, letter, macro +
 raw categories, selected name id, page) serializes into short query params
 (`?g=&l=&mc=&rc=&n=&p=`). Every Zustand mutation pushes to the URL with

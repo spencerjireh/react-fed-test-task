@@ -1,8 +1,48 @@
+import { cva } from 'class-variance-authority';
 import type { Ref } from 'react';
 
-import { cn } from '@/lib/cn';
-
 import type { Name } from '../types';
+
+const item = cva(
+  [
+    'block w-full font-heading leading-tight transition-all duration-150 ease-out',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main',
+  ].join(' '),
+  {
+    variants: {
+      variant: {
+        results: 'text-center',
+        detail: 'text-left',
+      },
+      tone: {
+        focal: 'font-normal text-red-main',
+        muted: 'font-light text-neutral-dark/80 hover:text-neutral-dark',
+      },
+    },
+    compoundVariants: [
+      {
+        variant: 'results',
+        tone: 'focal',
+        class: 'text-[30px] md:text-[52px]',
+      },
+      {
+        variant: 'detail',
+        tone: 'focal',
+        class: 'text-[28px] md:text-[45px]',
+      },
+      {
+        variant: 'results',
+        tone: 'muted',
+        class: 'text-[22px] md:text-[40px]',
+      },
+      {
+        variant: 'detail',
+        tone: 'muted',
+        class: 'text-[20px] md:text-[35px]',
+      },
+    ],
+  },
+);
 
 interface NameListItemProps {
   name: Name;
@@ -21,7 +61,7 @@ export function NameListItem({
   isCentered = false,
   variant = 'detail',
 }: NameListItemProps) {
-  const renderAsFocal = isSelected || isCentered;
+  const tone = isSelected || isCentered ? 'focal' : 'muted';
 
   return (
     <button
@@ -29,18 +69,7 @@ export function NameListItem({
       type="button"
       data-name-title={name.title}
       onClick={() => onSelect(name.title)}
-      className={cn(
-        'block w-full font-heading transition-all duration-150 ease-out',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main',
-        variant === 'results' ? 'text-center' : 'text-left',
-        renderAsFocal
-          ? variant === 'results'
-            ? 'text-[30px] font-normal leading-tight text-red-main md:text-[52px]'
-            : 'text-[28px] font-normal leading-tight text-red-main md:text-[45px]'
-          : variant === 'results'
-            ? 'text-[22px] font-light leading-tight text-neutral-dark/80 hover:text-neutral-dark md:text-[40px]'
-            : 'text-[20px] font-light leading-tight text-neutral-dark/80 hover:text-neutral-dark md:text-[35px]',
-      )}
+      className={item({ variant, tone })}
     >
       {name.title}
     </button>

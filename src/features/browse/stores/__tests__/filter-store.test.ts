@@ -24,9 +24,19 @@ const FAMOUS_RAW_IDS = [
   '019c8a34-3614-71a6-b955-df5540ecdfce',
   '019c8a34-361c-73fb-b8c9-db6b77d32feb',
 ] as const;
+const FAMOUS_RAW_NAMES = [
+  'Cartoon',
+  'Celebrities',
+  'Disney',
+  'Literary',
+  'Most Popular',
+  'Musical',
+  'Regal',
+] as const;
 const CARTOON_ID = FAMOUS_RAW_IDS[0];
 const DISNEY_ID = FAMOUS_RAW_IDS[2];
 const UNUSUAL_ID = '019c8a34-362d-7087-99c4-1a4eb48d3f6b';
+const OPTIMISTIC_ID = '019c8a34-3619-7134-a023-806d72219174';
 
 describe('computeInitialState', () => {
   it('defaults to Both/null/empty when the URL has no filter params', () => {
@@ -62,10 +72,12 @@ describe('computeInitialState', () => {
   });
 
   it('promotes a macro when every child raw arrives via the URL without a mc= entry', () => {
-    const rc = FAMOUS_RAW_IDS.join(',');
+    const rc = FAMOUS_RAW_NAMES.join(',');
     window.history.replaceState({}, '', `/?rc=${rc}`);
     const state = computeInitialState();
     expect(state.macroCategories.has('Famous')).toBe(true);
+    for (const id of FAMOUS_RAW_IDS)
+      expect(state.rawCategories.has(id)).toBe(true);
   });
 });
 
@@ -264,5 +276,36 @@ describe('serializeFilterStateToUrl', () => {
     const url = serializeFilterStateToUrl(useFilterStore.getState());
     window.history.replaceState({}, '', `/?${url}`);
     expect(computeInitialState().selectedNameTitle).toBe('Xiáng');
+  });
+
+  it('omits raws covered by a present macro to keep share URLs short', () => {
+    act(() => useFilterStore.getState().toggleMacro('Famous'));
+    const url = serializeFilterStateToUrl(useFilterStore.getState());
+    expect(url).toContain('mc=Famous');
+    expect(url).not.toContain('rc=');
+  });
+
+  it('keeps standalone raws not covered by any present macro', () => {
+    act(() => {
+      useFilterStore.getState().toggleMacro('Famous');
+      useFilterStore.getState().toggleRaw(OPTIMISTIC_ID);
+    });
+    const url = serializeFilterStateToUrl(useFilterStore.getState());
+    expect(url).toContain('mc=Famous');
+    expect(url).toContain('rc=Optimistic');
+    expect(url).not.toContain(OPTIMISTIC_ID);
+  });
+
+  it('hydrates rc= name tokens back into raw category IDs', () => {
+    window.history.replaceState({}, '', '/?rc=Optimistic');
+    const state = computeInitialState();
+    expect(state.rawCategories.has(OPTIMISTIC_ID)).toBe(true);
+  });
+
+  it('drops unknown rc= name tokens silently', () => {
+    window.history.replaceState({}, '', '/?rc=NotARealCategory,Optimistic');
+    const state = computeInitialState();
+    expect(state.rawCategories.has(OPTIMISTIC_ID)).toBe(true);
+    expect(state.rawCategories.size).toBe(1);
   });
 });

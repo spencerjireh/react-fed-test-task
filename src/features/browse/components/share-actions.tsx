@@ -46,7 +46,7 @@ export function ShareActions({ title }: ShareActionsProps) {
 
   const handleTweet = () => {
     const tweetText = `I found the perfect pet name: ${title}`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(href)}`;
+    const url = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(href)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

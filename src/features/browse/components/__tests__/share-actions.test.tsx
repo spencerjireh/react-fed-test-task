@@ -49,7 +49,7 @@ describe('ShareActions', () => {
     });
   });
 
-  it('Twitter click opens twitter.com/intent/tweet with encoded text and URL', async () => {
+  it('Twitter click opens x.com/intent/post with encoded text and URL', async () => {
     renderApp(<ShareActions title="Andromeda" />);
 
     await userEvent.click(
@@ -58,7 +58,7 @@ describe('ShareActions', () => {
 
     expect(openSpy).toHaveBeenCalledTimes(1);
     const [openUrl, target] = openSpy.mock.calls[0];
-    expect(openUrl).toMatch(/^https:\/\/twitter\.com\/intent\/tweet\?/);
+    expect(openUrl).toMatch(/^https:\/\/x\.com\/intent\/post\?/);
     expect(openUrl).toContain(
       encodeURIComponent('I found the perfect pet name: Andromeda'),
     );

@@ -1,7 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ReactNode, Ref } from 'react';
-import { useImperativeHandle } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useFilterStore } from '@/features/browse/stores/filter-store';
@@ -10,31 +8,7 @@ import { App } from '../app';
 
 // Virtuoso measures its viewport; in jsdom that yields zero height and no rows.
 // Stub it to render every row inline so queries resolve without scrolling.
-interface StubVirtuosoProps<T> {
-  ref?: Ref<{
-    scrollToIndex: (...args: unknown[]) => void;
-    scrollIntoView: (...args: unknown[]) => void;
-  }>;
-  data: T[];
-  itemContent: (index: number, item: T) => ReactNode;
-}
-
-vi.mock('react-virtuoso', () => ({
-  Virtuoso: <T,>({ ref, data, itemContent }: StubVirtuosoProps<T>) => {
-    useImperativeHandle(
-      ref,
-      () => ({ scrollToIndex: vi.fn(), scrollIntoView: vi.fn() }),
-      [],
-    );
-    return (
-      <div data-testid="virtuoso">
-        {data.map((item, i) => (
-          <div key={i}>{itemContent(i, item)}</div>
-        ))}
-      </div>
-    );
-  },
-}));
+vi.mock('react-virtuoso', async () => await import('@/testing/virtuoso-stub'));
 
 describe('App', () => {
   beforeEach(() => {

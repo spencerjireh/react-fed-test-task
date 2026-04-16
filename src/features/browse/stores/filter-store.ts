@@ -14,7 +14,13 @@ import {
   MACRO_CATEGORIES,
   type MacroCategory,
 } from '../types';
-import { getMacrosFor, getRawIdsForMacro } from '../utils/macro-category-map';
+import {
+  getMacrosFor,
+  getRawIdForName,
+  getRawIdsCoveredByMacros,
+  getRawIdsForMacro,
+  getRawNameForId,
+} from '../utils/macro-category-map';
 
 export interface FilterState {
   gender: Gender | 'Both';
@@ -79,7 +85,11 @@ function fromUrlParams(params: FilterUrlParams): FilterState {
   const macros = new Set(
     (params.macroCategories ?? []).filter(isMacroCategory),
   );
-  const raws = new Set(params.rawCategories ?? []);
+  const raws = new Set(
+    (params.rawCategories ?? [])
+      .map(getRawIdForName)
+      .filter((id): id is string => typeof id === 'string'),
+  );
   const synced = canonicalize(macros, raws);
   return {
     gender,
@@ -99,15 +109,18 @@ export function computeInitialState(): FilterState {
 }
 
 export function serializeFilterStateToUrl(state: FilterState): string {
+  const covered = getRawIdsCoveredByMacros(state.macroCategories);
+  const standaloneRawNames = [...state.rawCategories]
+    .filter((id) => !covered.has(id))
+    .map(getRawNameForId)
+    .filter((name): name is string => typeof name === 'string');
   return encodeFilterUrlParams({
     gender: state.gender === 'Both' ? undefined : state.gender,
     letter: state.letter ?? undefined,
     macroCategories: state.macroCategories.size
       ? [...state.macroCategories]
       : undefined,
-    rawCategories: state.rawCategories.size
-      ? [...state.rawCategories]
-      : undefined,
+    rawCategories: standaloneRawNames.length ? standaloneRawNames : undefined,
     selectedNameTitle: state.selectedNameTitle ?? undefined,
   });
 }

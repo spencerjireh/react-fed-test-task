@@ -1,6 +1,6 @@
 import type { Gender, Letter, MacroCategory, RawCategory } from '../types';
 
-import { getRawIdsForMacro } from './macro-category-map';
+import { getRawIdsCoveredByMacros } from './macro-category-map';
 
 const GENDER_WORDS: Record<Gender | 'Both', string> = {
   M: 'Male ',
@@ -8,13 +8,7 @@ const GENDER_WORDS: Record<Gender | 'Both', string> = {
   Both: '',
 };
 
-function joinAnd(items: string[]): string {
-  if (items.length === 0) return '';
-  if (items.length === 1) return items[0];
-  if (items.length === 2) return `${items[0]} and ${items[1]}`;
-  const head = items.slice(0, -1).join(', ');
-  return `${head}, and ${items[items.length - 1]}`;
-}
+const LIST_FORMAT = new Intl.ListFormat('en-US', { type: 'conjunction' });
 
 export function describeFilters(
   gender: Gender | 'Both',
@@ -25,10 +19,7 @@ export function describeFilters(
 ): string {
   const macros = [...macroCategories];
 
-  const coveredByMacro = new Set<string>();
-  for (const macro of macros) {
-    for (const id of getRawIdsForMacro(macro)) coveredByMacro.add(id);
-  }
+  const coveredByMacro = getRawIdsCoveredByMacros(macros);
 
   const standaloneRawNames = [...rawCategories]
     .filter((id) => !coveredByMacro.has(id))
@@ -39,7 +30,9 @@ export function describeFilters(
 
   const genderWord = GENDER_WORDS[gender];
   const letterClause = letter ? ` starting with ${letter}` : '';
-  const categoryClause = labels.length ? ` in ${joinAnd(labels)}` : '';
+  const categoryClause = labels.length
+    ? ` in ${LIST_FORMAT.format(labels)}`
+    : '';
 
   if (!genderWord && !letterClause && !categoryClause) {
     return 'No names match.';

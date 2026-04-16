@@ -1,14 +1,13 @@
 import { expect, test } from '@playwright/test';
 
 const AARON_TITLE = 'Aaron';
-const DRINKS_ID = '019c8a34-35f6-70a9-bda7-5f0eaf8a07d5';
 
 test.describe('Category filter', () => {
   test.beforeEach(async ({}, testInfo) => {
     test.skip(testInfo.project.name !== 'chromium', 'desktop-only');
   });
 
-  test('checking Drinks narrows the list and writes the raw id to the URL', async ({
+  test('checking Drinks narrows the list and writes the raw name to the URL', async ({
     page,
   }) => {
     // Seed a selection so the name list renders (cover hero would hide it).
@@ -27,7 +26,7 @@ test.describe('Category filter', () => {
     await expect(drinksItem).toBeVisible();
     await drinksItem.click();
 
-    await expect(page).toHaveURL(new RegExp(`rc=${DRINKS_ID}`));
+    await expect(page).toHaveURL(/rc=Drinks/);
 
     await page.keyboard.press('Escape');
 

@@ -1,6 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { KeyboardEventHandler, ReactNode, Ref } from 'react';
-import { useImperativeHandle } from 'react';
+import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
@@ -12,69 +11,17 @@ import {
   userEvent,
   waitFor,
 } from '@/testing/test-utils';
+import {
+  resetVirtuosoStub,
+  virtuosoCallbacks,
+  virtuosoMethods,
+} from '@/testing/virtuoso-stub';
 
 import { useFilterStore } from '../../stores/filter-store';
 import type { RawName } from '../../types';
 import { NameList } from '../name-list';
 
-// Virtuoso doesn't render in jsdom; stub renders items directly.
-const scrollToIndex = vi.fn();
-const scrollIntoView = vi.fn((opts: { index: number; done?: () => void }) =>
-  opts.done?.(),
-);
-interface ListRange {
-  startIndex: number;
-  endIndex: number;
-}
-const captured = {
-  initialTopMostItemIndex: undefined as number | undefined,
-  atTopStateChange: undefined as ((value: boolean) => void) | undefined,
-  atBottomStateChange: undefined as ((value: boolean) => void) | undefined,
-  rangeChanged: undefined as ((range: ListRange) => void) | undefined,
-};
-
-interface StubVirtuosoProps<T> {
-  ref?: Ref<{
-    scrollToIndex: typeof scrollToIndex;
-    scrollIntoView: typeof scrollIntoView;
-  }>;
-  data: T[];
-  itemContent: (index: number, item: T) => ReactNode;
-  initialTopMostItemIndex?: number;
-  onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
-  atTopStateChange?: (value: boolean) => void;
-  atBottomStateChange?: (value: boolean) => void;
-  rangeChanged?: (range: ListRange) => void;
-  className?: string;
-}
-
-vi.mock('react-virtuoso', () => ({
-  Virtuoso: <T,>({
-    ref,
-    data,
-    itemContent,
-    initialTopMostItemIndex,
-    onKeyDown,
-    atTopStateChange,
-    atBottomStateChange,
-    rangeChanged,
-    className,
-  }: StubVirtuosoProps<T>) => {
-    captured.initialTopMostItemIndex = initialTopMostItemIndex;
-    captured.atTopStateChange = atTopStateChange;
-    captured.atBottomStateChange = atBottomStateChange;
-    captured.rangeChanged = rangeChanged;
-    useImperativeHandle(ref, () => ({ scrollToIndex, scrollIntoView }), []);
-    return (
-      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-      <div data-testid="virtuoso" className={className} onKeyDown={onKeyDown}>
-        {data.map((item, i) => (
-          <div key={i}>{itemContent(i, item)}</div>
-        ))}
-      </div>
-    );
-  },
-}));
+vi.mock('react-virtuoso', async () => await import('@/testing/virtuoso-stub'));
 
 function Harness({ children }: { children?: ReactNode }) {
   return <UrlSyncHarness>{children ?? <NameList />}</UrlSyncHarness>;
@@ -94,12 +41,7 @@ const FIXTURE: RawName[] = Array.from({ length: 30 }).map((_, i) => {
 
 describe('NameList', () => {
   beforeEach(() => {
-    scrollToIndex.mockClear();
-    scrollIntoView.mockClear();
-    captured.initialTopMostItemIndex = undefined;
-    captured.atTopStateChange = undefined;
-    captured.atBottomStateChange = undefined;
-    captured.rangeChanged = undefined;
+    resetVirtuosoStub();
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
@@ -140,7 +82,7 @@ describe('NameList', () => {
     const up = screen.getByRole('button', { name: 'Previous page' });
     expect(up).toBeDisabled();
 
-    act(() => captured.atTopStateChange?.(false));
+    act(() => virtuosoCallbacks.atTopStateChange?.(false));
     expect(up).toBeEnabled();
   });
 
@@ -151,7 +93,7 @@ describe('NameList', () => {
     const down = screen.getByRole('button', { name: 'Next page' });
     expect(down).toBeEnabled();
 
-    act(() => captured.atBottomStateChange?.(true));
+    act(() => virtuosoCallbacks.atBottomStateChange?.(true));
     expect(down).toBeDisabled();
   });
 
@@ -160,13 +102,13 @@ describe('NameList', () => {
     await screen.findByRole('button', { name: 'A00' });
 
     // Simulate Virtuoso reporting rows 0..9 visible (10 rows on screen).
-    act(() => captured.rangeChanged?.({ startIndex: 0, endIndex: 9 }));
-    act(() => captured.atTopStateChange?.(false));
+    act(() => virtuosoCallbacks.rangeChanged?.({ startIndex: 0, endIndex: 9 }));
+    act(() => virtuosoCallbacks.atTopStateChange?.(false));
 
     const down = screen.getByRole('button', { name: 'Next page' });
     await userEvent.click(down);
 
-    expect(scrollToIndex).toHaveBeenCalledWith({
+    expect(virtuosoMethods.scrollToIndex).toHaveBeenCalledWith({
       index: 10,
       align: 'start',
       behavior: 'smooth',
@@ -178,7 +120,7 @@ describe('NameList', () => {
     renderApp(<Harness />);
 
     await screen.findByRole('button', { name: 'A00' });
-    expect(captured.initialTopMostItemIndex).toBe(23);
+    expect(virtuosoCallbacks.initialTopMostItemIndex).toBe(23);
   });
 
   it('initialTopMostItemIndex falls back to 0 when selectedNameTitle is unknown', async () => {
@@ -186,7 +128,7 @@ describe('NameList', () => {
     renderApp(<Harness />);
 
     await screen.findByRole('button', { name: 'A00' });
-    expect(captured.initialTopMostItemIndex).toBe(0);
+    expect(virtuosoCallbacks.initialTopMostItemIndex).toBe(0);
   });
 
   it('Virtuoso list uses the scrollbar-none utility', async () => {
@@ -203,7 +145,7 @@ describe('NameList', () => {
     first.focus();
     await userEvent.keyboard('{ArrowDown}');
 
-    expect(scrollIntoView).toHaveBeenCalledWith(
+    expect(virtuosoMethods.scrollIntoView).toHaveBeenCalledWith(
       expect.objectContaining({ index: 1 }),
     );
     expect(screen.getByRole('button', { name: 'B01' })).toHaveFocus();
@@ -216,7 +158,7 @@ describe('NameList', () => {
     first.focus();
     await userEvent.keyboard('{ArrowUp}');
 
-    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(virtuosoMethods.scrollIntoView).not.toHaveBeenCalled();
     expect(first).toHaveFocus();
   });
 

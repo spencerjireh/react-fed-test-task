@@ -1,6 +1,4 @@
 import { http, HttpResponse } from 'msw';
-import type { ReactNode, Ref } from 'react';
-import { useImperativeHandle } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
@@ -27,24 +25,7 @@ function stubMatchMedia(isDesktop: boolean) {
   });
 }
 
-interface StubVirtuosoProps<T> {
-  ref?: Ref<{ scrollToIndex: (args: unknown) => void }>;
-  data: T[];
-  itemContent: (index: number, item: T) => ReactNode;
-}
-
-vi.mock('react-virtuoso', () => ({
-  Virtuoso: <T,>({ ref, data, itemContent }: StubVirtuosoProps<T>) => {
-    useImperativeHandle(ref, () => ({ scrollToIndex: () => {} }), []);
-    return (
-      <div data-testid="virtuoso">
-        {data.map((item, i) => (
-          <div key={i}>{itemContent(i, item)}</div>
-        ))}
-      </div>
-    );
-  },
-}));
+vi.mock('react-virtuoso', async () => await import('@/testing/virtuoso-stub'));
 
 const FIXTURE: RawName[] = [
   {

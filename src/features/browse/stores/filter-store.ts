@@ -11,30 +11,6 @@ import {
 
 import type { Gender, Letter, MacroCategory } from '../types';
 
-/**
- * Filter store. Holds the entire shareable/hydratable UI state for the
- * browse feature: which gender is selected, which letter narrows the
- * list, which macro + raw categories are toggled on, which name is
- * selected for the detail pane, and which page the chevron pagination
- * is on.
- *
- * - `gender` is a three-valued union. `'Both'` is the no-filter state.
- *   `null` is never a valid value.
- * - `macroCategories` and `rawCategories` are `Set`s; actions MUST construct
- *   a new Set on mutation so Zustand's reference-equality check triggers
- *   subscribed re-renders.
- * - `selectedNameId === null` triggers the Cover hero treatment.
- *
- * Hydration precedence runs once at module load:
- *   URL params → localStorage → defaults.
- *
- * Write-through:
- *   - localStorage mirror happens *inside* each action (pure JS, no React).
- *   - URL mirror happens in `useFilterUrlSync` (separate React hook) because
- *     it needs `useNavigate`. Decoupling means the store has zero React
- *     Router dependency.
- */
-
 export interface FilterState {
   gender: Gender | 'Both';
   letter: Letter | null;
@@ -89,11 +65,7 @@ const DEFAULT_STATE: FilterState = {
   page: 0,
 };
 
-/**
- * Serialize state → plain JSON for localStorage. Sets become arrays.
- * Kept separate from the URL encoding because localStorage preserves the
- * exact shape (including defaults), while URLs elide defaults.
- */
+/** Shape stored in localStorage. */
 interface PersistedFilterState {
   gender: Gender | 'Both';
   letter: Letter | null;
@@ -156,10 +128,7 @@ function fromUrlParams(params: FilterUrlParams): FilterState {
   };
 }
 
-/**
- * Build the starting state at module load. URL wins if any filter key is
- * present; otherwise localStorage; otherwise defaults.
- */
+/** URL wins over localStorage, then defaults. */
 export function computeInitialState(): FilterState {
   if (typeof window === 'undefined') return DEFAULT_STATE;
 
@@ -179,12 +148,7 @@ function persist(state: FilterState): void {
   setJson(LOCAL_STORAGE_KEY, toPersisted(state));
 }
 
-/**
- * Produce the next state the way Zustand expects — returning the patched
- * slice — while also mirroring the *full* next state to localStorage as a
- * side effect. Using this helper inside every action keeps the persist call
- * centralized instead of scattered.
- */
+/** Returns the patch and mirrors the full next state to localStorage. */
 function withPersist<P extends Partial<FilterState>>(
   state: FilterState,
   patch: P,
@@ -238,9 +202,6 @@ export const useFilterStore = create<FilterStore>((set) => ({
   setPage: (page) => set((s) => withPersist(s, { page })),
 
   clearFilters: () =>
-    // clearFilters resets every *filter* slice; selectedNameId stays so the
-    // user's currently-open detail pane survives a "clear filters" click.
-    // page resets because the list is about to change shape.
     set((s) =>
       withPersist(s, {
         gender: 'Both',

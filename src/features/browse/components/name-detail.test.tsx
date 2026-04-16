@@ -48,8 +48,6 @@ describe('NameDetail', () => {
     expect(
       await screen.findByRole('heading', { name: 'Andromeda', level: 2 }),
     ).toBeInTheDocument();
-    // Description rendered as plain text, HTML tags stripped. Uses the real
-    // `stripHtml` util via `decorateName`, so HTML entities remain literal.
     expect(screen.getByText(/The hero of Homer.*Iliad\./)).toBeInTheDocument();
   });
 
@@ -63,8 +61,6 @@ describe('NameDetail', () => {
 
     await screen.findByRole('heading', { name: 'Andromeda' });
     await waitFor(() => {
-      // Athena shares the 'shared' category with Andromeda, so it surfaces
-      // via `useRelatedNames` as the sole related entry.
       expect(screen.getByText(/Athena/)).toBeInTheDocument();
     });
     expect(screen.getByText('Related name')).toBeInTheDocument();

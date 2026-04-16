@@ -5,8 +5,7 @@ import type { MacroCategory, Name } from '../types';
 
 import { filterNames } from './filter-names';
 
-// Minimal fixture names — tests don't need the real 679 entries, just enough
-// to exercise each branch of the predicate independently.
+// Small fixture set for each filter branch.
 function buildName(
   partial: Partial<Name> & { id: string; title: string },
 ): Name {
@@ -66,7 +65,7 @@ const bandit = buildName({
 const marley = buildName({
   id: 'marley',
   title: 'Marley',
-  gender: [], // the empty-gender name from the real dataset
+  gender: [],
   categories: ['cat-optimistic'],
   macroCategories: ['Joyful'],
 });
@@ -133,7 +132,6 @@ describe('filterNames — categories', () => {
         rawCategories: new Set(['cat-greek']),
       }),
     );
-    // Marley via macro, Andromeda via raw id.
     expect(new Set(result.map((n) => n.id))).toEqual(
       new Set(['marley', 'andromeda']),
     );

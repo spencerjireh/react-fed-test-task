@@ -1,34 +1,26 @@
-import { Virtuoso } from 'react-virtuoso';
+import { useRef } from 'react';
+import { type ListRange, Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { VIEWPORT_HEIGHT, PAGE_SIZE } from '@/config/constants';
+import { PAGE_SIZE, VIEWPORT_HEIGHT } from '@/config/constants';
 
 import { useNames } from '../api/get-names';
 import { useFilteredNames } from '../hooks/use-filtered-names';
 import { useFilterStore } from '../stores/filter-store';
 
+import { ChevronPair } from './chevron-pair';
 import { NameListItem } from './name-list-item';
 
-/**
- * Master list of names.
- *
- * Data flow:
- *   useNames() → Name[] → useFilteredNames(names) → Name[] → Virtuoso
- *
- * Filter state is respected from day one even if filter controls aren't
- * yet visible: the store hydrates from URL on module load, so pasting
- * `/?g=M&l=A` must narrow the list immediately. Declining to call
- * `useFilteredNames` would break that contract.
- *
- * Chevron pagination (`virtuosoRef`, `rangeChanged` → `page`,
- * `initialTopMostItemIndex`) is additive — not yet wired here.
- */
 export function NameList() {
   const { data: names, isPending, isError } = useNames();
   const filtered = useFilteredNames(names ?? []);
 
   const selectedNameId = useFilterStore((s) => s.selectedNameId);
   const setSelectedNameId = useFilterStore((s) => s.setSelectedNameId);
+  const page = useFilterStore((s) => s.page);
+  const setPage = useFilterStore((s) => s.setPage);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   if (isPending) return <NameListSkeleton />;
   if (isError) {
@@ -44,27 +36,53 @@ export function NameList() {
     );
   }
 
+  const maxPage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1);
+
+  const handleRangeChanged = ({ startIndex, endIndex }: ListRange) => {
+    // Near the end of a short list, Virtuoso may clamp the start index.
+    // Use `endIndex` so the last page still resolves to `maxPage`.
+    const atEnd = endIndex >= filtered.length - 1 && filtered.length > 0;
+    const next = atEnd ? maxPage : Math.floor(startIndex / PAGE_SIZE);
+    if (next !== page) setPage(next);
+  };
+
+  const goToPage = (n: number) => {
+    const clamped = Math.max(0, Math.min(n, maxPage));
+    virtuosoRef.current?.scrollToIndex({
+      index: clamped * PAGE_SIZE,
+      align: 'start',
+      behavior: 'smooth',
+    });
+  };
+
   return (
-    <Virtuoso
-      data={filtered}
-      style={{ height: VIEWPORT_HEIGHT }}
-      className="w-full"
-      aria-label="Pet names"
-      itemContent={(_, name) => (
-        <NameListItem
-          name={name}
-          isSelected={name.id === selectedNameId}
-          onSelect={setSelectedNameId}
-        />
-      )}
-    />
+    <div className="flex items-start gap-8 md:gap-[52px]">
+      <ChevronPair
+        page={page}
+        maxPage={maxPage}
+        onPrev={() => goToPage(page - 1)}
+        onNext={() => goToPage(page + 1)}
+      />
+      <Virtuoso
+        ref={virtuosoRef}
+        data={filtered}
+        initialTopMostItemIndex={page * PAGE_SIZE}
+        rangeChanged={handleRangeChanged}
+        style={{ height: VIEWPORT_HEIGHT }}
+        className="w-full"
+        aria-label="Pet names"
+        itemContent={(_, name) => (
+          <NameListItem
+            name={name}
+            isSelected={name.id === selectedNameId}
+            onSelect={setSelectedNameId}
+          />
+        )}
+      />
+    </div>
   );
 }
 
-/**
- * Loading placeholder that matches a full viewport (PAGE_SIZE = 11 rows),
- * so the layout doesn't jump when data resolves.
- */
 function NameListSkeleton() {
   return (
     <div

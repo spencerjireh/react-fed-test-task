@@ -1,20 +1,3 @@
-/**
- * Filter-state URL serialization.
- *
- * This module is schema-aware (it knows the 6 short keys) but type-generic:
- * values flow as strings, numbers, and string arrays, not as domain types
- * like Gender / MacroCategory. The filter store layer (features/browse)
- * handles domain validation on the decoded primitives. Keeping URL mechanics
- * here and validation there respects the ESLint zone that forbids lib/ from
- * importing feature types.
- *
- * URL schema: /?g=M&l=A&mc=Famous,Funny&rc=<id>,<id>&n=<id>&p=2
- *
- * Empty values are omitted from the encoded query so shared URLs stay
- * clean. Parsing is lenient: missing or malformed values are dropped,
- * never thrown.
- */
-
 export interface FilterUrlParams {
   gender?: string;
   letter?: string;
@@ -24,8 +7,7 @@ export interface FilterUrlParams {
   page?: number;
 }
 
-// Short query-string keys. Kept in one place so the encode/decode pair
-// cannot drift from each other.
+// Short query-string keys used by the browse filters.
 const KEYS = {
   gender: 'g',
   letter: 'l',
@@ -35,14 +17,10 @@ const KEYS = {
   page: 'p',
 } as const;
 
-/** The keys recognized as filter-state keys in a URL. */
+/** Recognized filter-state keys in a URL. */
 export const FILTER_URL_KEYS = Object.values(KEYS);
 
-/**
- * Encode filter params to a query string (no leading '?'). Omits any slice
- * that is undefined, empty-string, empty-array, or page 0 so shared URLs
- * don't carry default-value noise.
- */
+/** Encodes filter params without a leading `?`. */
 export function encodeFilterUrlParams(params: FilterUrlParams): string {
   const search = new URLSearchParams();
   if (params.gender) search.set(KEYS.gender, params.gender);
@@ -61,11 +39,7 @@ export function encodeFilterUrlParams(params: FilterUrlParams): string {
   return search.toString();
 }
 
-/**
- * Decode a query string or URLSearchParams into filter params. Unknown keys
- * are ignored. Malformed slices (invalid page number, etc.) are dropped
- * silently — callers merge the result with their defaults.
- */
+/** Decodes a query string or URLSearchParams into filter params. */
 export function decodeFilterUrlParams(
   input: URLSearchParams | string,
 ): FilterUrlParams {
@@ -103,7 +77,7 @@ export function decodeFilterUrlParams(
   return result;
 }
 
-/** True if the URL has any of our filter keys — used for hydration precedence. */
+/** True when the URL includes any filter-state keys. */
 export function hasFilterUrlParams(input: URLSearchParams | string): boolean {
   const search =
     input instanceof URLSearchParams ? input : new URLSearchParams(input);
@@ -111,7 +85,7 @@ export function hasFilterUrlParams(input: URLSearchParams | string): boolean {
 }
 
 function splitList(raw: string): string[] {
-  // Accept trailing / leading / consecutive commas; drop empty tokens.
+  // Drop empty tokens from stray commas.
   return raw
     .split(',')
     .map((t) => t.trim())

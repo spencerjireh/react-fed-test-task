@@ -4,8 +4,7 @@ import type { RawName } from '../types';
 
 import { decorateName, decorateNames } from './decorate-name';
 
-// IDs pulled verbatim from public/data/categories.json so the mapping
-// assertions exercise real data, not fake UUIDs.
+// Real category IDs from the fixture data.
 const CARTOON_ID = '019c8a34-3585-7249-b7c2-a4f85945291e';
 const CELEBRITIES_ID = '019c8a34-35ed-737c-acff-a43af999817c';
 const SHORT_NAMES_ID = '019c8a34-3621-715f-96e3-a9ce5aa5de45';
@@ -39,7 +38,6 @@ describe('decorateName', () => {
     const name = decorateName(
       buildRaw({ categories: [CARTOON_ID, CELEBRITIES_ID] }),
     );
-    // Cartoon and Celebrities both map to Famous — dedup should collapse them.
     expect(name.macroCategories).toEqual(['Famous']);
   });
 

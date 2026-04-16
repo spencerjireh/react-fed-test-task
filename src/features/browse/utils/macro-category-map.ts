@@ -1,10 +1,6 @@
 import type { MacroCategory } from '../types';
 
-// Maps each raw category ID (from public/data/categories.json) to its
-// single macro bucket. The Figma exposes 7 top-level filter dropdowns
-// over 25 raw categories; each raw category lives in exactly one macro.
-// Any raw ID not present in this map falls through to 'Others' via
-// getMacroFor.
+// Maps each raw category ID to one macro category.
 const CATEGORY_ID_TO_MACRO: Record<string, MacroCategory> = {
   // Famous
   '019c8a34-3585-7249-b7c2-a4f85945291e': 'Famous', // Cartoon
@@ -46,11 +42,7 @@ const CATEGORY_ID_TO_MACRO: Record<string, MacroCategory> = {
   '019c8a34-3627-7210-8e6c-478589659de5': 'Others', // Space and Science
 };
 
-/**
- * Look up the macro category for a raw category ID. Unmapped IDs fall through
- * to 'Others' so the UI never silently drops a name just because the map is
- * out of date.
- */
+/** Returns the macro category for a raw category ID. */
 export function getMacroFor(rawCategoryId: string): MacroCategory {
   return CATEGORY_ID_TO_MACRO[rawCategoryId] ?? 'Others';
 }

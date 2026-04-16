@@ -5,11 +5,7 @@ import { server } from '@/testing/mocks/server';
 
 vi.mock('zustand');
 
-// Vitest 4 ships a stub localStorage that is just `{}` — no Storage prototype,
-// no getItem / setItem methods — which breaks both production calls against it
-// and `vi.spyOn(window.localStorage, '...')`. Install a simple in-memory Storage
-// implementation globally so tests can exercise localStorage the way browser
-// code expects.
+// Vitest 4's localStorage stub is too limited for these tests.
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
   get length(): number {

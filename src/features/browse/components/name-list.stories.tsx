@@ -6,13 +6,7 @@ import { useFilterStore } from '../stores/filter-store';
 
 import { NameList } from './name-list';
 
-/**
- * Wrap the list in a column-sized container so Virtuoso measures correctly
- * in the Storybook canvas (target: 352px wide).
- */
 function Framed() {
-  // Reset filter state per story render so a story that tweaks the store
-  // doesn't leak state across navigations.
   useEffect(() => {
     useFilterStore.setState({
       gender: 'Both',
@@ -40,15 +34,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/**
- * Default loaded state — uses the global MSW handlers (679 real names).
- */
 export const Loaded: Story = {};
 
-/**
- * Empty state — handler override returns zero names. Self-documenting
- * via the MSW layer rather than via store-state tricks.
- */
 export const Empty: Story = {
   parameters: {
     msw: {
@@ -59,10 +46,6 @@ export const Empty: Story = {
   },
 };
 
-/**
- * Loading state — handler never resolves, so the query stays pending and
- * the 11-row skeleton is visible.
- */
 export const Loading: Story = {
   parameters: {
     msw: {

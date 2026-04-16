@@ -38,10 +38,10 @@ export function GenderBand() {
   };
 
   return (
-    <section className="bg-cream-light">
-      <div className="mx-auto max-w-[1440px] px-6 py-10 md:px-12 lg:px-[165px] lg:py-[40px]">
-        <div className="flex flex-col items-center gap-4">
-          <h2 className="font-heading text-[25px] leading-[35px] text-neutral-dark">
+    <section className="md:bg-cream-light">
+      <div className="md:mx-auto md:max-w-[1440px] md:px-12 md:py-10 lg:px-[165px] lg:py-[40px]">
+        <div className="md:flex md:flex-col md:items-center md:gap-4">
+          <h2 className="hidden font-heading text-[25px] leading-[35px] text-neutral-dark md:block">
             Choose your pet&rsquo;s gender
           </h2>
           <div
@@ -49,7 +49,7 @@ export function GenderBand() {
             aria-label="Choose your pet's gender"
             onKeyDown={handleKeyDown}
             tabIndex={-1}
-            className="flex flex-wrap justify-center gap-4"
+            className="flex gap-2 md:flex-wrap md:justify-center md:gap-4"
           >
             {OPTIONS.map((o, i) => (
               <GenderPill

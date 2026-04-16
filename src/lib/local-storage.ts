@@ -1,20 +1,8 @@
-/**
- * Safe localStorage JSON wrapper. Returns null (or no-ops on write) when:
- * - Running in a non-browser environment (SSR, tests without jsdom).
- * - localStorage access is blocked (Safari private mode, corporate policy).
- * - Stored payload is not valid JSON.
- * - Quota is exceeded on write.
- *
- * localStorage is a *convenience* mirror for the filter store; the URL is
- * authoritative. Callers should treat these as best-effort and
- * never block UI behavior on storage success.
- */
-
 function hasStorage(): boolean {
   try {
     return typeof window !== 'undefined' && !!window.localStorage;
   } catch {
-    // Accessing window.localStorage can throw in sandboxed contexts.
+    // Accessing window.localStorage throws in sandboxed contexts.
     return false;
   }
 }
@@ -35,8 +23,7 @@ export function setJson(key: string, value: unknown): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Swallow QuotaExceededError and any serialization/storage failures —
-    // losing a filter mirror is strictly better than crashing a mutation.
+    // Quota/serialization failures are non-fatal — the mirror is best-effort.
   }
 }
 
@@ -45,6 +32,6 @@ export function removeJson(key: string): void {
   try {
     window.localStorage.removeItem(key);
   } catch {
-    // same rationale as setJson
+    /* best-effort */
   }
 }

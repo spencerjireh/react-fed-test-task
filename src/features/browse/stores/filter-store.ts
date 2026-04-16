@@ -148,7 +148,6 @@ function persist(state: FilterState): void {
   setJson(LOCAL_STORAGE_KEY, toPersisted(state));
 }
 
-/** Returns the patch and mirrors the full next state to localStorage. */
 function withPersist<P extends Partial<FilterState>>(
   state: FilterState,
   patch: P,
@@ -157,7 +156,6 @@ function withPersist<P extends Partial<FilterState>>(
   return patch;
 }
 
-/** Encode the current state to a URL query string (used by useFilterUrlSync). */
 export function serializeFilterStateToUrl(state: FilterState): string {
   return encodeFilterUrlParams({
     gender: state.gender === 'Both' ? undefined : state.gender,

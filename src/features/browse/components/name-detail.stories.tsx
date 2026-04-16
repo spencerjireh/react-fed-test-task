@@ -62,11 +62,6 @@ export const Selected: Story = {
   args: { selectedId: 'andromeda-id' },
 };
 
-/**
- * No-selection state renders `null` — the canvas stays empty on
- * purpose. The planned Cover hero lives in `BrowseLayout`, not here, so
- * this pane simply bows out when nothing is selected.
- */
 export const NoSelection: Story = {
   args: { selectedId: null },
 };

@@ -5,7 +5,7 @@ import { server } from '@/testing/mocks/server';
 
 vi.mock('zustand');
 
-// Vitest 4's localStorage stub is too limited for these tests.
+// Vitest 4's built-in localStorage stub doesn't implement enough of the API.
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
   get length(): number {
@@ -39,11 +39,12 @@ Object.defineProperty(window, 'localStorage', {
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterAll(() => server.close());
 beforeEach(() => {
-  const ResizeObserverMock = vi.fn(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }));
+  // Must be a class — `vi.fn()` fails the `new.target` check Radix/floating-ui do.
+  class ResizeObserverMock {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+  }
   vi.stubGlobal('ResizeObserver', ResizeObserverMock);
   sharedLocalStorage.clear();
   initializeDb();

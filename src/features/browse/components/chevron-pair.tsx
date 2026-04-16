@@ -8,14 +8,6 @@ interface ChevronPairProps {
   onNext: () => void;
 }
 
-/**
- * Vertical pair of pagination chevrons flanking the name list.
- *
- * Fixed at the list's viewport height so the two buttons anchor the top
- * and bottom of the visible window. Hidden below the `md` breakpoint —
- * on mobile the list falls back to native vertical scroll with no
- * chevron UI (a Phase 6 decision locked in the layout story).
- */
 export function ChevronPair({
   page,
   maxPage,

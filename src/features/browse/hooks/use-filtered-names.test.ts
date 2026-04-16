@@ -43,7 +43,6 @@ const coco = buildName('c', 'Coco', {
 const names = [andromeda, bandit, coco];
 
 beforeEach(() => {
-  // Reset store via the __mocks__/zustand.ts auto-reset.
   window.history.replaceState({}, '', '/');
 });
 
@@ -69,7 +68,6 @@ describe('useFilteredNames', () => {
     const { result, rerender } = renderHook(() => useFilteredNames(names));
     const first = result.current;
 
-    // Unrelated mutation — selection and page don't affect filtering.
     act(() => useFilterStore.getState().setSelectedNameId('a'));
     act(() => useFilterStore.getState().setPage(3));
     rerender();
@@ -83,5 +81,23 @@ describe('useFilteredNames', () => {
     act(() => useFilterStore.getState().setLetter('A'));
     expect(result.current).not.toBe(first);
     expect(result.current.map((n) => n.id)).toEqual(['a']);
+  });
+
+  it('keeps a name hitting only the macro set when rawCategories is also non-empty', () => {
+    const { result } = renderHook(() => useFilteredNames(names));
+
+    act(() => useFilterStore.getState().toggleMacro('International'));
+    act(() => useFilterStore.getState().toggleRaw('funny'));
+
+    expect(result.current.map((n) => n.id).sort()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('keeps a name hitting only the raw set when macroCategories is also non-empty', () => {
+    const { result } = renderHook(() => useFilteredNames(names));
+
+    act(() => useFilterStore.getState().toggleMacro('Funny'));
+    act(() => useFilterStore.getState().toggleRaw('greek'));
+
+    expect(result.current.map((n) => n.id).sort()).toEqual(['a', 'b', 'c']);
   });
 });

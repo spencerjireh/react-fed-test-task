@@ -1,6 +1,5 @@
-import type { MacroCategory } from '../types';
+import type { MacroCategory, RawCategory } from '../types';
 
-// Maps each raw category ID to one macro category.
 const CATEGORY_ID_TO_MACRO: Record<string, MacroCategory> = {
   // Famous
   '019c8a34-3585-7249-b7c2-a4f85945291e': 'Famous', // Cartoon
@@ -42,7 +41,15 @@ const CATEGORY_ID_TO_MACRO: Record<string, MacroCategory> = {
   '019c8a34-3627-7210-8e6c-478589659de5': 'Others', // Space and Science
 };
 
-/** Returns the macro category for a raw category ID. */
 export function getMacroFor(rawCategoryId: string): MacroCategory {
   return CATEGORY_ID_TO_MACRO[rawCategoryId] ?? 'Others';
+}
+
+export function getRawsForMacro(
+  macro: MacroCategory,
+  allRaws: RawCategory[],
+): RawCategory[] {
+  return allRaws
+    .filter((raw) => getMacroFor(raw.id) === macro)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }

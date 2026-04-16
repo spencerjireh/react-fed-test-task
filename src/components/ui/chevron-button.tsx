@@ -8,16 +8,8 @@ interface ChevronButtonProps {
   className?: string;
 }
 
-/**
- * 48×48 chevron-in-a-circle button used for paginating lists.
- *
- * SVG path is inlined so `stroke="currentColor"` can be driven by the
- * Tailwind colour classes on the button (red-main when enabled,
- * neutral-light when disabled). The source SVGs under `src/assets/icons/`
- * have a hard-coded neutral stroke and can't be re-coloured via CSS on
- * their own — inlining is the simplest fix without a separate SVGR
- * pipeline.
- */
+// SVG inlined so stroke="currentColor" picks up text-* classes;
+// source icons in src/assets/icons/ have hard-coded strokes.
 export function ChevronButton({
   direction,
   disabled,

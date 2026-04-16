@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
-import { renderApp, screen, waitFor } from '@/testing/test-utils';
+import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
 import { useFilterStore } from '../stores/filter-store';
 import type { RawName } from '../types';
@@ -102,5 +102,45 @@ describe('NameDetail', () => {
     await waitFor(() => {
       expect(document.title).toBe('Andromeda - Pet Names');
     });
+  });
+
+  it('moves focus to the heading when a name is selected', async () => {
+    server.use(
+      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
+    );
+    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+
+    renderApp(<NameDetail />);
+
+    const heading = await screen.findByRole('heading', {
+      name: 'Andromeda',
+      level: 2,
+    });
+    await waitFor(() => expect(heading).toHaveFocus());
+  });
+
+  it('Escape clears the selection and restores focus to the list item', async () => {
+    server.use(
+      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
+    );
+    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+
+    // Stand-in list-item for the focus-restore query to find.
+    const stubItem = document.createElement('button');
+    stubItem.setAttribute('data-name-id', 'andromeda-id');
+    stubItem.textContent = 'Andromeda';
+    document.body.appendChild(stubItem);
+
+    renderApp(<NameDetail />);
+
+    const heading = await screen.findByRole('heading', { name: 'Andromeda' });
+    await waitFor(() => expect(heading).toHaveFocus());
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(useFilterStore.getState().selectedNameId).toBeNull();
+    await waitFor(() => expect(stubItem).toHaveFocus());
+
+    stubItem.remove();
   });
 });

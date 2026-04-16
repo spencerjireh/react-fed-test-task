@@ -1,8 +1,10 @@
+import type { KeyboardEvent } from 'react';
 import { useRef } from 'react';
 import { type ListRange, Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { PAGE_SIZE, VIEWPORT_HEIGHT } from '@/config/constants';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 import { useNames } from '../api/get-names';
 import { useFilteredNames } from '../hooks/use-filtered-names';
@@ -10,6 +12,12 @@ import { useFilterStore } from '../stores/filter-store';
 
 import { ChevronPair } from './chevron-pair';
 import { NameListItem } from './name-list-item';
+
+function focusById(id: string) {
+  const selector = `[data-name-id="${CSS.escape(id)}"]`;
+  const el = document.querySelector(selector);
+  (el as HTMLElement | null)?.focus();
+}
 
 export function NameList() {
   const { data: names, isPending, isError } = useNames();
@@ -21,6 +29,8 @@ export function NameList() {
   const setPage = useFilterStore((s) => s.setPage);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const listHeight = isDesktop ? VIEWPORT_HEIGHT : '70vh';
 
   if (isPending) return <NameListSkeleton />;
   if (isError) {
@@ -55,6 +65,27 @@ export function NameList() {
     });
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    const focused = document.activeElement as HTMLElement | null;
+    const currentId = focused?.getAttribute('data-name-id');
+    const currentIndex = currentId
+      ? filtered.findIndex((n) => n.id === currentId)
+      : -1;
+    if (currentIndex === -1) return;
+
+    const step = event.key === 'ArrowDown' ? 1 : -1;
+    const nextIndex = currentIndex + step;
+    if (nextIndex < 0 || nextIndex >= filtered.length) return;
+
+    event.preventDefault();
+    const nextId = filtered[nextIndex].id;
+    virtuosoRef.current?.scrollIntoView({
+      index: nextIndex,
+      done: () => focusById(nextId),
+    });
+  };
+
   return (
     <div className="flex items-start gap-8 md:gap-[52px]">
       <ChevronPair
@@ -68,9 +99,10 @@ export function NameList() {
         data={filtered}
         initialTopMostItemIndex={page * PAGE_SIZE}
         rangeChanged={handleRangeChanged}
-        style={{ height: VIEWPORT_HEIGHT }}
+        style={{ height: listHeight }}
         className="w-full"
         aria-label="Pet names"
+        onKeyDown={handleKeyDown}
         itemContent={(_, name) => (
           <NameListItem
             name={name}

@@ -11,6 +11,23 @@ import type { RawName } from '../types';
 
 import { BrowseLayout } from './browse-layout';
 
+function stubMatchMedia(isDesktop: boolean) {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: (query: string) => ({
+      matches: query.includes('min-width: 768px') ? isDesktop : !isDesktop,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }),
+  });
+}
+
 interface StubVirtuosoProps<T> {
   ref?: Ref<{ scrollToIndex: (args: unknown) => void }>;
   data: T[];
@@ -63,6 +80,7 @@ describe('BrowseLayout', () => {
   });
 
   it('renders the Cover hero when no name is selected', async () => {
+    stubMatchMedia(true);
     renderApp(<BrowseLayout />);
 
     expect(await screen.findByText(/I NEED\s+A NAME/)).toBeInTheDocument();
@@ -72,6 +90,7 @@ describe('BrowseLayout', () => {
   });
 
   it('renders the master-detail pane when a name is selected', async () => {
+    stubMatchMedia(true);
     useFilterStore.setState({ selectedNameId: 'andromeda-id' });
 
     renderApp(<BrowseLayout />);
@@ -80,5 +99,35 @@ describe('BrowseLayout', () => {
       await screen.findByRole('heading', { name: 'Andromeda', level: 2 }),
     ).toBeInTheDocument();
     expect(screen.queryByText(/I NEED\s+A NAME/)).not.toBeInTheDocument();
+  });
+
+  it('wraps the filter chrome in a navigation landmark', async () => {
+    stubMatchMedia(true);
+    renderApp(<BrowseLayout />);
+
+    const nav = await screen.findByRole('navigation', {
+      name: 'Filter pet names',
+    });
+    expect(nav).toBeInTheDocument();
+  });
+
+  it('renders the detail inside a dialog on mobile', async () => {
+    stubMatchMedia(false);
+    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+
+    renderApp(<BrowseLayout />);
+
+    await screen.findByRole('heading', { name: 'Andromeda', level: 2 });
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('does not render a dialog on desktop', async () => {
+    stubMatchMedia(true);
+    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+
+    renderApp(<BrowseLayout />);
+
+    await screen.findByRole('heading', { name: 'Andromeda', level: 2 });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

@@ -9,7 +9,7 @@ const circle = cva(
   [
     'flex h-[37px] w-[37px] shrink-0 items-center justify-center rounded-full',
     'font-heading text-[25px] leading-[35px]',
-    'transition-colors',
+    'transition-colors duration-[120ms]',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2 focus-visible:ring-offset-white',
   ].join(' '),
   {

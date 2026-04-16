@@ -46,6 +46,27 @@ beforeEach(() => {
     disconnect = vi.fn();
   }
   vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+
+  // jsdom has no matchMedia. Default to `true` so components see the
+  // desktop layout; per-test stubs can flip it.
+  if (!('matchMedia' in window) || typeof window.matchMedia !== 'function') {
+    const createMql = (query: string) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    });
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: (query: string) => createMql(query),
+    });
+  }
+
   sharedLocalStorage.clear();
   initializeDb();
 });

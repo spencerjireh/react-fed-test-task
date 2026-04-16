@@ -1,4 +1,8 @@
+import { AnimatePresence, motion } from 'framer-motion';
+
 import { Head } from '@/components/seo/head';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 import { useFilterStore } from '../stores/filter-store';
 import { useFilterUrlSync } from '../stores/use-filter-url-sync';
@@ -8,22 +12,30 @@ import { FilterBar } from './filter-bar';
 import { GenderBand } from './gender-band';
 import { LetterStrip } from './letter-strip';
 import { NameDetail } from './name-detail';
+import { NameDetailDialog } from './name-detail-dialog';
 import { NameList } from './name-list';
 
 export function BrowseLayout() {
   useFilterUrlSync();
   const selectedNameId = useFilterStore((s) => s.selectedNameId);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const reduce = useReducedMotion();
+
+  const fadeTransition = reduce ? { duration: 0 } : { duration: 0.2 };
 
   return (
     <div className="min-h-screen bg-cream-light">
       <Head title="Browse" />
 
-      <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap px-4 py-3 md:block md:gap-0 md:overflow-visible md:whitespace-normal md:p-0">
+      <nav
+        aria-label="Filter pet names"
+        className="flex items-center gap-3 overflow-x-auto whitespace-nowrap px-4 py-3 md:block md:gap-0 md:overflow-visible md:whitespace-normal md:p-0"
+      >
         <GenderBand />
         <FilterBar />
-      </div>
+      </nav>
 
-      <main className="mx-auto max-w-[1440px] px-6 py-10 md:px-12 lg:px-[165px] lg:py-[40px]">
+      <main className="mx-auto max-w-[1440px] px-6 py-10 md:px-[48px] xl:px-[165px] xl:py-[40px]">
         <h1 className="font-heading text-[30px] leading-[36px] text-neutral-dark">
           All pets names
         </h1>
@@ -32,14 +44,31 @@ export function BrowseLayout() {
           <LetterStrip />
         </div>
 
-        {selectedNameId === null ? (
-          <CoverHero />
-        ) : (
-          <div className="mt-10 grid grid-cols-1 gap-8 lg:mt-[40px] lg:grid-cols-[352px_1fr] lg:gap-[100px]">
-            <NameList />
-            <NameDetail />
-          </div>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {selectedNameId === null ? (
+            <motion.div
+              key="cover"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={fadeTransition}
+            >
+              <CoverHero />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={fadeTransition}
+              className="mt-10 grid grid-cols-1 gap-8 md:mt-[40px] md:grid-cols-[352px_1fr] xl:gap-[100px]"
+            >
+              <NameList />
+              {isDesktop ? <NameDetail /> : <NameDetailDialog />}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

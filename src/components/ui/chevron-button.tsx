@@ -1,3 +1,6 @@
+import { motion } from 'framer-motion';
+
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { cn } from '@/lib/cn';
 
 interface ChevronButtonProps {
@@ -17,18 +20,21 @@ export function ChevronButton({
   'aria-label': ariaLabel,
   className,
 }: ChevronButtonProps) {
+  const reduce = useReducedMotion();
+  const hoverScale = reduce || disabled ? 1 : 1.05;
+
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
+      whileHover={{ scale: hoverScale }}
+      whileTap={{ scale: 1 }}
       className={cn(
-        'flex h-12 w-12 items-center justify-center transition-transform',
+        'flex h-12 w-12 items-center justify-center',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2 focus-visible:ring-offset-cream-light',
-        disabled
-          ? 'cursor-not-allowed text-neutral-light'
-          : 'text-red-main hover:scale-[1.05] active:scale-100',
+        disabled ? 'cursor-not-allowed text-neutral-light' : 'text-red-main',
         className,
       )}
     >
@@ -47,6 +53,6 @@ export function ChevronButton({
           strokeLinejoin="round"
         />
       </svg>
-    </button>
+    </motion.button>
   );
 }

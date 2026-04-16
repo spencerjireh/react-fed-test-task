@@ -1,8 +1,8 @@
 import { factory, nullable, primaryKey } from '@mswjs/data';
 
-import categoriesJson from '../../../public/data/categories.json';
-import lettersJson from '../../../public/data/letters.json';
-import namesJson from '../../../public/data/names.json';
+import categoriesJson from './data/categories.json';
+import lettersJson from './data/letters.json';
+import namesJson from './data/names.json';
 
 const models = {
   name: {

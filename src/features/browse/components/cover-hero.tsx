@@ -1,13 +1,28 @@
+import type { KeyboardEvent } from 'react';
+
+import { useFilterStore } from '../stores/filter-store';
+
 const COVER_HERO_JPG = 'cover-hero.jpg';
 const COVER_HERO_WEBP = 'cover-hero.webp';
 
 export function CoverHero() {
   const base = import.meta.env.BASE_URL;
+  const goToResults = useFilterStore((s) => s.goToResults);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    goToResults();
+  };
 
   return (
-    <section
-      aria-label="Pick a name"
-      className="relative mt-6 flex flex-col items-center gap-6 md:mt-[24px] md:gap-8 lg:min-h-[814px] lg:justify-end lg:gap-0"
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label="Start browsing names"
+      onClick={goToResults}
+      onKeyDown={handleKeyDown}
+      className="relative mt-6 flex cursor-pointer flex-col items-center gap-6 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main md:mt-[24px] md:gap-8 lg:min-h-[814px] lg:justify-end lg:gap-0"
     >
       <picture>
         <source srcSet={`${base}${COVER_HERO_WEBP}`} type="image/webp" />
@@ -32,6 +47,6 @@ export function CoverHero() {
       >
         {`I NEED  A NAME`}
       </p>
-    </section>
+    </div>
   );
 }

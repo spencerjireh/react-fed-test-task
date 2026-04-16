@@ -6,7 +6,7 @@ import { Head } from '@/components/seo/head';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
-import { useSelectedName } from '../hooks/use-selected-name';
+import { useBrowseState } from '../hooks/use-browse-state';
 import { useFilterUrlSync } from '../stores/use-filter-url-sync';
 
 import { CoverHero } from './cover-hero';
@@ -16,10 +16,11 @@ import { LetterStrip } from './letter-strip';
 import { NameDetail } from './name-detail';
 import { NameDetailDialog } from './name-detail-dialog';
 import { NameList } from './name-list';
+import { ResultsPane } from './results-pane';
 
 export function BrowseLayout() {
   useFilterUrlSync();
-  const selected = useSelectedName();
+  const state = useBrowseState();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const reduce = useReducedMotion();
 
@@ -37,7 +38,10 @@ export function BrowseLayout() {
         <FilterBar />
       </nav>
 
-      <main className="mx-auto max-w-[1440px] px-6 py-10 md:px-[48px] xl:px-[165px] xl:py-[40px]">
+      <main
+        data-browse-state={state}
+        className="mx-auto max-w-[1440px] px-6 py-10 md:px-[48px] xl:px-[165px] xl:py-[40px]"
+      >
         <h1 className="font-heading text-[30px] leading-[36px] text-neutral-dark">
           All pets names
         </h1>
@@ -47,7 +51,7 @@ export function BrowseLayout() {
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {selected === null ? (
+          {state === 'cover' && (
             <motion.div
               key="cover"
               initial={{ opacity: 0 }}
@@ -57,9 +61,24 @@ export function BrowseLayout() {
             >
               <CoverHero />
             </motion.div>
-          ) : (
+          )}
+          {state === 'results' && (
             <motion.div
-              key="content"
+              key="results"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={fadeTransition}
+              className="mt-10 md:mt-[40px]"
+            >
+              <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+                <ResultsPane />
+              </ErrorBoundary>
+            </motion.div>
+          )}
+          {state === 'detail' && (
+            <motion.div
+              key="detail"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

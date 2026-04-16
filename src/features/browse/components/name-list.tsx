@@ -1,10 +1,11 @@
 import type { KeyboardEvent } from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { type ListRange, Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { PAGE_SIZE, VIEWPORT_HEIGHT } from '@/config/constants';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn } from '@/lib/cn';
 
 import { useNames } from '../api/get-names';
 import { useFilteredNames } from '../hooks/use-filtered-names';
@@ -13,13 +14,21 @@ import { useFilterStore } from '../stores/filter-store';
 import { ChevronPair } from './chevron-pair';
 import { NameListItem } from './name-list-item';
 
+interface NameListProps {
+  chevronSide?: 'left' | 'right';
+  centerEffect?: boolean;
+}
+
 function focusByTitle(title: string) {
   const selector = `[data-name-title="${CSS.escape(title)}"]`;
   const el = document.querySelector(selector);
   (el as HTMLElement | null)?.focus();
 }
 
-export function NameList() {
+export function NameList({
+  chevronSide = 'left',
+  centerEffect = false,
+}: NameListProps = {}) {
   const { data: names, isPending, isError } = useNames();
   const filtered = useFilteredNames(names ?? []);
 
@@ -31,6 +40,9 @@ export function NameList() {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const listHeight = isDesktop ? VIEWPORT_HEIGHT : '70vh';
+
+  // Seed 0 so the first paint centers before rangeChanged fires.
+  const [centerIndex, setCenterIndex] = useState(0);
 
   if (isPending) return <NameListSkeleton />;
   if (isError) {
@@ -54,6 +66,11 @@ export function NameList() {
     const atEnd = endIndex >= filtered.length - 1 && filtered.length > 0;
     const next = atEnd ? maxPage : Math.floor(startIndex / PAGE_SIZE);
     if (next !== page) setPage(next);
+
+    if (centerEffect && filtered.length > 0) {
+      const clampedEnd = Math.min(endIndex, filtered.length - 1);
+      setCenterIndex(Math.floor((startIndex + clampedEnd) / 2));
+    }
   };
 
   const goToPage = (n: number) => {
@@ -87,7 +104,13 @@ export function NameList() {
   };
 
   return (
-    <div className="flex items-start gap-8 md:gap-[52px]">
+    <div
+      className={cn(
+        'flex items-start gap-8 md:gap-[52px]',
+        chevronSide === 'right' && 'flex-row-reverse',
+      )}
+      data-chevron-side={chevronSide}
+    >
       <ChevronPair
         page={page}
         maxPage={maxPage}
@@ -103,11 +126,12 @@ export function NameList() {
         className="w-full"
         aria-label="Pet names"
         onKeyDown={handleKeyDown}
-        itemContent={(_, name) => (
+        itemContent={(index, name) => (
           <NameListItem
             name={name}
             isSelected={name.title === selectedNameTitle}
             onSelect={setSelectedNameTitle}
+            centerDistance={centerEffect ? Math.abs(index - centerIndex) : null}
           />
         )}
       />

@@ -199,4 +199,55 @@ describe('NameList', () => {
 
     expect(useFilterStore.getState().selectedNameTitle).toBe('A00');
   });
+
+  it('chevronSide="right" flips the chevron to the right edge of the flex row', async () => {
+    renderApp(
+      <Harness>
+        <NameList chevronSide="right" />
+      </Harness>,
+    );
+
+    await screen.findByRole('button', { name: 'A00' });
+
+    const virtuoso = screen.getByTestId('virtuoso');
+    const wrapper = virtuoso.parentElement!;
+    expect(wrapper).toHaveAttribute('data-chevron-side', 'right');
+    expect(wrapper).toHaveClass('flex-row-reverse');
+  });
+
+  it('chevronSide defaults to "left" (no flex-row-reverse)', async () => {
+    renderApp(<Harness />);
+
+    await screen.findByRole('button', { name: 'A00' });
+
+    const wrapper = screen.getByTestId('virtuoso').parentElement!;
+    expect(wrapper).toHaveAttribute('data-chevron-side', 'left');
+    expect(wrapper).not.toHaveClass('flex-row-reverse');
+  });
+
+  it('centerEffect renders filtered[0] as the focal item on first paint', async () => {
+    renderApp(
+      <Harness>
+        <NameList centerEffect />
+      </Harness>,
+    );
+
+    // filtered[0] = "A00" → focal (red, large); index 1 (B01) is one step
+    // away → scale 0.88, opacity 0.85; index 2 (C02) is two steps → scale 0.76.
+    const first = await screen.findByRole('button', { name: 'A00' });
+    expect(first).toHaveClass('text-red-main');
+    expect(first).toHaveClass('md:text-[45px]');
+
+    const second = screen.getByRole('button', { name: 'B01' });
+    expect(second).toHaveStyle({
+      transform: 'scale(0.88)',
+      opacity: '0.85',
+    });
+
+    const third = screen.getByRole('button', { name: 'C02' });
+    expect(third).toHaveStyle({
+      transform: 'scale(0.76)',
+      opacity: '0.7',
+    });
+  });
 });

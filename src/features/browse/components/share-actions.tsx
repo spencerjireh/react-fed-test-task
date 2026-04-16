@@ -1,10 +1,11 @@
 import type { ButtonHTMLAttributes } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { ShareLinkIcon } from '@/assets/icons/share-link';
-import { ShareMessengerIcon } from '@/assets/icons/share-messenger';
-import { ShareTwitterIcon } from '@/assets/icons/share-twitter';
 import { cn } from '@/lib/cn';
+
+import { ShareLinkIcon } from './icons/share-link';
+import { ShareMessengerIcon } from './icons/share-messenger';
+import { ShareTwitterIcon } from './icons/share-twitter';
 
 const TOAST_DURATION_MS = 1800;
 

@@ -2,6 +2,17 @@
 
 A single-page app for browsing 679 pet names. Filter by gender, letter, or category. Every view is a shareable URL. There's no backend; MSW intercepts `/api/*` in the browser.
 
+Implements the Pet Name Finder take-home; the task brief lives in `React_FED_Test_Task.md`.
+
+## Built with
+
+- **Framework:** React, TypeScript, Vite
+- **State:** Zustand (client state), TanStack Query (server state), React Router (URL sync)
+- **UI:** Tailwind CSS, class-variance-authority, Framer Motion, Radix UI, react-virtuoso
+- **Mocking:** MSW with `@mswjs/data` (browser SW + Node server)
+- **Testing:** Vitest, React Testing Library, Playwright, Storybook
+- **Tooling:** ESLint, Prettier, Husky, lint-staged
+
 ## Setup
 
 ```bash
@@ -55,9 +66,26 @@ flowchart TB
     style H fill:#fff,stroke:#666,stroke-width:2px
 ```
 
-**The URL is the source of truth.** Every filter lives in query params (`?g=&l=&mc=&rc=&n=&p=`): gender, letter, macro and raw categories, selected name, page. Zustand mutations push to the URL on every change and mirror to `localStorage`. On boot the store hydrates URL first, then localStorage, then defaults. Because the URL is canonical, "Copy link" is a plain `window.location.href`.
+**The URL is the source of truth.** Every filter lives in query params (`?g=&l=&mc=&rc=&n=&p=`): gender, letter, macro and raw categories, selected name, page. Zustand mutations push to the URL on every change. On boot the store hydrates from the URL, falling back to defaults. Because the URL is canonical, "Copy link" is a plain `window.location.href`.
 
-**Pagination is one-way.** Chevrons scroll the Virtuoso list; `page` is derived from Virtuoso's `rangeChanged` callback, not written back into it. Keyboard scroll, wheel scroll, and chevron clicks all flow through the same path. Hydration seeds `initialTopMostItemIndex` on first mount so no post-mount effect races the first `rangeChanged`.
+**Navigation is a three-state machine.** The URL also decides which content layout renders. No filter and no selection → Cover (hero photo and "I NEED A NAME"). Any filter but no selection → Results (papillon beside a depth-of-field name stack, chevrons on the right). Selection resolves to a real name → Detail (master + right pane, chevrons on the left). A `useBrowseState()` hook derives the state from the URL-backed store and hands `BrowseLayout` one branch to render.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Cover
+
+    Cover --> Results: click the hero<br/>(writes ?l=A&g=M)
+    Cover --> Results: click any filter / letter / gender
+    Results --> Detail: click a name<br/>(writes ?n=<title>)
+    Detail --> Detail: change filters<br/>(selection preserved)
+    Detail --> Results: Escape<br/>(clears selection)
+
+    Cover: Cover<br/>URL: bare
+    Results: Results<br/>URL: filters, no n=
+    Detail: Detail<br/>URL: filters + n=
+```
+
+**List performance: virtualized and paginated one-way.** `react-virtuoso` renders only the visible rows out of 679, so scroll and filter transitions stay cheap. Chevrons call `scrollToIndex`; `page` is derived from Virtuoso's `rangeChanged` callback, not written back into it. Keyboard scroll, wheel scroll, and chevron clicks all flow through the same path. Hydration seeds `initialTopMostItemIndex` on first mount so no post-mount effect races the first `rangeChanged`.
 
 **`BASE_URL` on every URL.** SW registration, `/api/*` fetches, and any static-asset `src` all derive from `import.meta.env.BASE_URL`. That makes the GitHub Pages subpath deploy work with zero retrofit. `fetch('/api/names')` would break on Pages; ``fetch(`${import.meta.env.BASE_URL}api/names`)`` doesn't.
 
@@ -65,9 +93,18 @@ flowchart TB
 
 ## Testing
 
-- **Unit + integration** via Vitest + RTL + MSW node. 152 tests across 22 files. Run `npm run test:ci`.
-- **E2E** via Playwright (chromium + mobile-chromium projects). 5 specs in `e2e/`: cover, browse, filter, share, mobile. Run `npm run e2e`. The `webServer` block boots `npm run dev` on port 3000 and lets the browser SW intercept `/api/*` exactly the way a real user hits it. No fixtures, no reset endpoint; every test starts with `page.goto('/')`.
+- **Unit + integration** via Vitest + RTL + MSW node. 172 tests across 24 files. Run `npm run test:ci`.
+- **E2E** via Playwright (chromium + mobile-chromium projects). 6 specs in `e2e/`: cover, browse, filter, share, mobile, results. Run `npm run e2e`. The `webServer` block boots `npm run dev` on port 3000 and lets the browser SW intercept `/api/*` exactly the way a real user hits it. No fixtures, no reset endpoint; every test starts with `page.goto('/')`.
 - **Storybook**, about 50 stories across 16 files. Run `npm run storybook`. `msw-storybook-addon` wires the same SW into every story so hooks resolve against the seeded DB.
+
+## Accessibility
+
+- `<nav>` and `<main>` landmarks wrap the filter chrome and main content.
+- The gender band is a `role="radiogroup"`; the letter strip is a `role="tablist"` with roving tabindex. Arrow keys move between options; Home and End jump to the first and last enabled tab.
+- Focus moves to the detail heading when a name is selected. Escape clears the selection and restores focus to the originating list item.
+- ArrowDown and ArrowUp move focus within the name list; Enter opens the detail.
+- All motion is gated on `prefers-reduced-motion: reduce`: cover fades, list transitions, chevron hover scale, and the mobile bottom sheet all flatten to zero duration when requested.
+- Color contrast: red on cream is reserved for large text (the 45px selected name, the 25px letter on a filled red circle). Body text is `#3A3533` on cream, which clears AA.
 
 ## Assumptions
 

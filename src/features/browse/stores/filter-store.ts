@@ -26,6 +26,7 @@ export interface FilterActions {
   setSelectedNameTitle: (title: string | null) => void;
   setPage: (page: number) => void;
   clearFilters: () => void;
+  goToResults: () => void;
 }
 
 export type FilterStore = FilterState & FilterActions;
@@ -136,4 +137,7 @@ export const useFilterStore = create<FilterStore>((set) => ({
       rawCategories: new Set(),
       page: 0,
     }),
+
+  // One set() so the URL only navigates once (no ?g=M flash before ?l=A).
+  goToResults: () => set({ gender: 'M', letter: 'A' }),
 }));

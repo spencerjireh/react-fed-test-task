@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   computeInitialState,
@@ -89,6 +89,20 @@ describe('useFilterStore actions', () => {
     const after = useFilterStore.getState().rawCategories;
     expect(after).not.toBe(before);
     expect(after.has('raw-42')).toBe(true);
+  });
+
+  it('goToResults writes gender=M and letter=A in a single subscribe tick', () => {
+    const subscriber = vi.fn();
+    const unsubscribe = useFilterStore.subscribe(subscriber);
+
+    act(() => useFilterStore.getState().goToResults());
+
+    // Two serial setters would emit two ticks and flash ?g=M in the URL between them.
+    expect(subscriber).toHaveBeenCalledTimes(1);
+    expect(useFilterStore.getState().gender).toBe('M');
+    expect(useFilterStore.getState().letter).toBe('A');
+
+    unsubscribe();
   });
 
   it('clearFilters resets all filter slices but preserves selectedNameTitle', () => {

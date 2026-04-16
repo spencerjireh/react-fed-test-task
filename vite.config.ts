@@ -6,7 +6,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base:
-    process.env.DEPLOY_TARGET === 'github-pages' ? '/dog-name-generator/' : '/',
+    process.env.DEPLOY_TARGET === 'github-pages'
+      ? '/react-fed-test-task/'
+      : '/',
   plugins: [react()],
   resolve: {
     tsconfigPaths: true,

@@ -11,9 +11,10 @@ const DRINKS_ID = '019c8a34-35f6-70a9-bda7-5f0eaf8a07d5';
 interface FramedProps {
   macros: Set<MacroCategory>;
   raws: Set<string>;
+  initialOpenMacro?: MacroCategory | null;
 }
 
-function Framed({ macros, raws }: FramedProps) {
+function Framed({ macros, raws, initialOpenMacro = null }: FramedProps) {
   useEffect(() => {
     useFilterStore.setState({
       gender: 'Both',
@@ -27,7 +28,7 @@ function Framed({ macros, raws }: FramedProps) {
 
   return (
     <div className="min-h-[200px] bg-cream-light pb-20 pt-6">
-      <FilterBar />
+      <FilterBar initialOpenMacro={initialOpenMacro} />
     </div>
   );
 }
@@ -52,5 +53,13 @@ export const WithActive: Story = {
   args: {
     macros: new Set<MacroCategory>(['Famous']),
     raws: new Set([DRINKS_ID]),
+  },
+};
+
+export const StripOpen: Story = {
+  args: {
+    macros: new Set(),
+    raws: new Set([DRINKS_ID]),
+    initialOpenMacro: 'Food and drinks',
   },
 };

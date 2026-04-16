@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/testing/mocks/server';
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
@@ -18,25 +18,8 @@ const FAMOUS_FIXTURE: RawCategory[] = [
   { id: LITERARY_ID, name: 'Literary', description: null },
 ];
 
-// jsdom doesn't implement the pointer-capture / scrollIntoView APIs Radix uses.
-function stubJsdomGaps() {
-  if (!Element.prototype.hasPointerCapture) {
-    Element.prototype.hasPointerCapture = () => false;
-  }
-  if (!Element.prototype.setPointerCapture) {
-    Element.prototype.setPointerCapture = () => undefined;
-  }
-  if (!Element.prototype.releasePointerCapture) {
-    Element.prototype.releasePointerCapture = () => undefined;
-  }
-  if (!Element.prototype.scrollIntoView) {
-    Element.prototype.scrollIntoView = () => undefined;
-  }
-}
-
 describe('CategoryDropdown', () => {
   beforeEach(() => {
-    stubJsdomGaps();
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
@@ -52,124 +35,61 @@ describe('CategoryDropdown', () => {
     );
   });
 
-  it('renders a trigger labeled "Filter by Famous" that starts closed', () => {
-    renderApp(<CategoryDropdown macro="Famous" />);
+  it('renders a trigger labeled "Filter by Famous" with aria-expanded=false when closed', () => {
+    renderApp(
+      <CategoryDropdown macro="Famous" isOpen={false} onToggle={() => {}} />,
+    );
 
     const trigger = screen.getByRole('button', { name: /Filter by Famous/i });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('opens the menu and shows All + the 3 raws when the trigger is clicked', async () => {
-    renderApp(<CategoryDropdown macro="Famous" />);
+  it('flips aria-expanded and rotates the chevron when isOpen=true', () => {
+    renderApp(
+      <CategoryDropdown macro="Famous" isOpen={true} onToggle={() => {}} />,
+    );
 
-    await waitFor(() =>
-      expect(useFilterStore.getState().macroCategories.size).toBe(0),
+    const trigger = screen.getByRole('button', { name: /Filter by Famous/i });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    // Chevron rotation is a child SVG wrapper with .rotate-180.
+    expect(trigger.querySelector('.rotate-180')).not.toBeNull();
+  });
+
+  it('calls onToggle when the trigger is clicked', async () => {
+    const onToggle = vi.fn();
+    renderApp(
+      <CategoryDropdown macro="Famous" isOpen={false} onToggle={onToggle} />,
     );
 
     await userEvent.click(
       screen.getByRole('button', { name: /Filter by Famous/i }),
     );
 
-    await screen.findByRole('menu');
-
-    const items = screen.getAllByRole('menuitemcheckbox');
-    expect(items).toHaveLength(4);
-    expect(
-      screen.getByRole('menuitemcheckbox', { name: /All Famous/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('menuitemcheckbox', { name: 'Cartoon' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('menuitemcheckbox', { name: 'Disney' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('menuitemcheckbox', { name: 'Literary' }),
-    ).toBeInTheDocument();
+    expect(onToggle).toHaveBeenCalledTimes(1);
   });
 
-  it('clicking "All Famous" toggles the macro in the store', async () => {
-    renderApp(<CategoryDropdown macro="Famous" />);
-
-    await userEvent.click(
-      screen.getByRole('button', { name: /Filter by Famous/i }),
-    );
-
-    const allFamous = await screen.findByRole('menuitemcheckbox', {
-      name: /All Famous/i,
-    });
-    expect(allFamous).not.toBeChecked();
-
-    await userEvent.click(allFamous);
-
-    await waitFor(() =>
-      expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(
-        true,
-      ),
-    );
-  });
-
-  it('clicking a raw category toggles that raw id in the store', async () => {
-    renderApp(<CategoryDropdown macro="Famous" />);
-
-    await userEvent.click(
-      screen.getByRole('button', { name: /Filter by Famous/i }),
-    );
-
-    const cartoon = await screen.findByRole('menuitemcheckbox', {
-      name: 'Cartoon',
-    });
-    await userEvent.click(cartoon);
-
-    await waitFor(() =>
-      expect(useFilterStore.getState().rawCategories.has(CARTOON_ID)).toBe(
-        true,
-      ),
-    );
-  });
-
-  it('keeps the menu open after toggling an item (supports multi-select)', async () => {
-    renderApp(<CategoryDropdown macro="Famous" />);
-
-    await userEvent.click(
-      screen.getByRole('button', { name: /Filter by Famous/i }),
-    );
-    await userEvent.click(
-      await screen.findByRole('menuitemcheckbox', { name: 'Cartoon' }),
-    );
-    await userEvent.click(
-      await screen.findByRole('menuitemcheckbox', { name: 'Disney' }),
-    );
-
-    expect(screen.getByRole('menu')).toBeInTheDocument();
-    expect(useFilterStore.getState().rawCategories.has(CARTOON_ID)).toBe(true);
-    expect(useFilterStore.getState().rawCategories.has(DISNEY_ID)).toBe(true);
-  });
-
-  it('Escape closes the menu', async () => {
-    renderApp(<CategoryDropdown macro="Famous" />);
-
-    await userEvent.click(
-      screen.getByRole('button', { name: /Filter by Famous/i }),
-    );
-    await screen.findByRole('menu');
-
-    await userEvent.keyboard('{Escape}');
-
-    await waitFor(() =>
-      expect(screen.queryByRole('menu')).not.toBeInTheDocument(),
-    );
-  });
-
-  it('trigger styles as active when any raw in the macro is selected', async () => {
+  it('marks the trigger as active when any raw in the macro is selected', async () => {
     useFilterStore.setState({
       rawCategories: new Set([CARTOON_ID]),
     });
-    renderApp(<CategoryDropdown macro="Famous" />);
+    renderApp(
+      <CategoryDropdown macro="Famous" isOpen={false} onToggle={() => {}} />,
+    );
 
     await waitFor(() => {
       const trigger = screen.getByRole('button', { name: /Filter by Famous/i });
-      expect(trigger).toHaveClass('text-red-main');
+      expect(trigger).toHaveAttribute('data-active', 'true');
+    });
+  });
+
+  it('does not mark the trigger as active when no selection in that macro', async () => {
+    renderApp(
+      <CategoryDropdown macro="Famous" isOpen={false} onToggle={() => {}} />,
+    );
+
+    await waitFor(() => {
+      const trigger = screen.getByRole('button', { name: /Filter by Famous/i });
+      expect(trigger).not.toHaveAttribute('data-active');
     });
   });
 });

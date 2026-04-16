@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useFilterStore } from '../stores/filter-store';
 import type { MacroCategory, RawCategory } from '../types';
 
-import { CategoryDropdown } from './category-dropdown';
+import { CategoryChecklistStrip } from './category-checklist-strip';
 
 const CARTOON_ID = '019c8a34-3585-7249-b7c2-a4f85945291e';
 const CELEBRITIES_ID = '019c8a34-35ed-737c-acff-a43af999817c';
@@ -27,10 +27,9 @@ interface FramedProps {
   macro: MacroCategory;
   macros: Set<MacroCategory>;
   raws: Set<string>;
-  isOpen: boolean;
 }
 
-function Framed({ macro, macros, raws, isOpen }: FramedProps) {
+function Framed({ macro, macros, raws }: FramedProps) {
   useEffect(() => {
     useFilterStore.setState({
       gender: 'Both',
@@ -43,14 +42,14 @@ function Framed({ macro, macros, raws, isOpen }: FramedProps) {
   }, [macros, raws]);
 
   return (
-    <div className="flex min-h-[80px] items-start bg-white p-6">
-      <CategoryDropdown macro={macro} isOpen={isOpen} onToggle={() => {}} />
+    <div className="min-h-[120px] bg-white">
+      <CategoryChecklistStrip macro={macro} />
     </div>
   );
 }
 
 const meta = {
-  title: 'Browse/CategoryDropdown',
+  title: 'Browse/CategoryChecklistStrip',
   component: Framed,
   parameters: {
     layout: 'fullscreen',
@@ -67,38 +66,26 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Closed: Story = {
+export const NoneChecked: Story = {
   args: {
     macro: 'Famous',
     macros: new Set(),
     raws: new Set(),
-    isOpen: false,
   },
 };
 
-export const Open: Story = {
-  args: {
-    macro: 'Famous',
-    macros: new Set(),
-    raws: new Set(),
-    isOpen: true,
-  },
-};
-
-export const OpenWithSelections: Story = {
+export const WithChecks: Story = {
   args: {
     macro: 'Famous',
     macros: new Set(),
     raws: new Set([CARTOON_ID, DISNEY_ID]),
-    isOpen: true,
   },
 };
 
-export const ClosedWithSelections: Story = {
+export const AllChecked: Story = {
   args: {
     macro: 'Famous',
     macros: new Set<MacroCategory>(['Famous']),
     raws: new Set(FAMOUS_RAWS.map((r) => r.id)),
-    isOpen: false,
   },
 };

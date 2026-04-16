@@ -20,7 +20,7 @@ test.describe('Category filter', () => {
       .click();
 
     // exact:true because "Drinks" substring-matches "All Food and drinks".
-    const drinksItem = page.getByRole('menuitemcheckbox', {
+    const drinksItem = page.getByRole('checkbox', {
       name: 'Drinks',
       exact: true,
     });

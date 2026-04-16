@@ -13,7 +13,7 @@ test.describe('Share (URL round-trip)', () => {
   }) => {
     await page.goto(`/?n=${ACHILLES_TITLE}`);
     await expect(
-      page.getByRole('heading', { name: 'Achilles', level: 2 }),
+      page.getByRole('region', { name: 'Selected name details' }),
     ).toBeVisible();
 
     // exact:true — "Male" otherwise substring-matches "Female".
@@ -34,7 +34,7 @@ test.describe('Share (URL round-trip)', () => {
     await freshPage.goto(sharedUrl);
 
     await expect(
-      freshPage.getByRole('heading', { name: 'Achilles', level: 2 }),
+      freshPage.getByRole('region', { name: 'Selected name details' }),
     ).toBeVisible();
     await expect(
       freshPage.getByRole('radio', { name: 'Male', exact: true }),

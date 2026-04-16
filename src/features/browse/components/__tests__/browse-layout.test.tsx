@@ -95,7 +95,7 @@ describe('BrowseLayout', () => {
     renderApp(<BrowseLayout />);
 
     expect(
-      await screen.findByRole('heading', { name: 'Andromeda', level: 2 }),
+      await screen.findByRole('region', { name: 'Selected name details' }),
     ).toBeInTheDocument();
     expect(screen.queryByText(/I NEED\s+A NAME/)).not.toBeInTheDocument();
   });
@@ -116,7 +116,7 @@ describe('BrowseLayout', () => {
 
     renderApp(<BrowseLayout />);
 
-    await screen.findByRole('heading', { name: 'Andromeda', level: 2 });
+    await screen.findByRole('region', { name: 'Selected name details' });
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
@@ -126,7 +126,7 @@ describe('BrowseLayout', () => {
 
     renderApp(<BrowseLayout />);
 
-    await screen.findByRole('heading', { name: 'Andromeda', level: 2 });
+    await screen.findByRole('region', { name: 'Selected name details' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

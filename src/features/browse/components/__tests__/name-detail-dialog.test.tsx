@@ -45,18 +45,17 @@ describe('NameDetailDialog', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('opens as a dialog containing the selected name heading', async () => {
+  it('opens as a dialog containing the selected name description', async () => {
     useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
     renderApp(<NameDetailDialog />);
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(
-      await screen.findByRole('heading', { name: 'Andromeda', level: 2 }),
+      await screen.findByText(/The hero of Homer.*Iliad\./),
     ).toBeInTheDocument();
   });
 
   it('Escape closes the dialog, clears the selection, and restores focus', async () => {
-    // Stub list-item the focus-restore handler will seek out by data-name-title.
     const stubItem = document.createElement('button');
     stubItem.setAttribute('data-name-title', 'Andromeda');
     stubItem.textContent = 'Andromeda';
@@ -66,7 +65,7 @@ describe('NameDetailDialog', () => {
     renderApp(<NameDetailDialog />);
 
     await screen.findByRole('dialog');
-    await screen.findByRole('heading', { name: 'Andromeda' });
+    await screen.findByText(/The hero of Homer/);
 
     await userEvent.keyboard('{Escape}');
 

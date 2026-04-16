@@ -19,7 +19,7 @@ test.describe('Mobile bottom sheet', () => {
     const dialog = page.getByRole('dialog', { name: /selected name details/i });
     await expect(dialog).toBeVisible();
     await expect(
-      dialog.getByRole('heading', { name: 'Aaron', level: 2 }),
+      dialog.getByRole('region', { name: 'Selected name details' }),
     ).toBeVisible();
 
     await expect(

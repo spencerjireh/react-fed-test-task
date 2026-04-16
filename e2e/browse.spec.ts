@@ -14,7 +14,7 @@ test.describe('Browse', () => {
     await page.goto(`/?n=${ACHILLES_TITLE}`);
 
     await expect(
-      page.getByRole('heading', { name: 'Achilles', level: 2 }),
+      page.getByRole('region', { name: 'Selected name details' }),
     ).toBeVisible();
 
     // Virtuoso only renders the first ~11 rows — pick names near the top
@@ -26,10 +26,7 @@ test.describe('Browse', () => {
 
     await page.getByRole('button', { name: 'Ace' }).click();
 
-    await expect(
-      page.getByRole('heading', { name: 'Ace', level: 2 }),
-    ).toBeVisible();
-    await expect(page).toHaveURL(/n=[^&]+/);
+    await expect(page).toHaveURL(/n=Ace/);
 
     await expect(page.getByText(/related name/i)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Copy link' })).toBeVisible();

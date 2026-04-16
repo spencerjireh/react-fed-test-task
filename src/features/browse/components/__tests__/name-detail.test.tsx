@@ -5,8 +5,12 @@ import { server } from '@/testing/mocks/server';
 import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
 import { useFilterStore } from '../../stores/filter-store';
-import type { RawName } from '../../types';
+import type { RawCategory, RawName } from '../../types';
 import { NameDetail } from '../name-detail';
+
+const CARTOON_ID = '019c8a34-3585-7249-b7c2-a4f85945291e';
+const CELEBRITIES_ID = '019c8a34-35ed-737c-acff-a43af999817c';
+const DISNEY_ID = '019c8a34-35f2-70b1-b866-69a4921d15a8';
 
 // Overlap fixture: Andromeda (selected) shares two categories with Apollo,
 // one each with Ares and Atlas, none with Boris. Top-3 should sort by
@@ -17,72 +21,82 @@ const FIXTURE: RawName[] = [
     title: 'Andromeda',
     definition: '<p>The hero of Homer&rsquo;s Iliad.</p>',
     gender: ['F'],
-    categories: ['cat1', 'cat2'],
+    categories: [CARTOON_ID, DISNEY_ID],
   },
   {
     id: 'apollo-id',
     title: 'Apollo',
     definition: '<p>Greek god of the sun.</p>',
     gender: ['M'],
-    categories: ['cat1', 'cat2'],
+    categories: [CARTOON_ID, DISNEY_ID],
   },
   {
     id: 'atlas-id',
     title: 'Atlas',
     definition: '<p>Titan who holds the sky.</p>',
     gender: ['M'],
-    categories: ['cat1'],
+    categories: [CARTOON_ID],
   },
   {
     id: 'ares-id',
     title: 'Ares',
     definition: '<p>Greek god of war.</p>',
     gender: ['M'],
-    categories: ['cat2'],
+    categories: [DISNEY_ID],
   },
   {
     id: 'boris-id',
     title: 'Boris',
     definition: '<p>Unrelated.</p>',
     gender: ['M'],
-    categories: ['cat3'],
+    categories: [CELEBRITIES_ID],
   },
 ];
 
+const CATEGORIES_FIXTURE: RawCategory[] = [
+  { id: CARTOON_ID, name: 'Cartoon', description: null },
+  { id: CELEBRITIES_ID, name: 'Celebrities', description: null },
+  { id: DISNEY_ID, name: 'Disney', description: null },
+];
+
+function seedHandlers(names: RawName[] = FIXTURE) {
+  server.use(
+    http.get('*/api/names', () => HttpResponse.json({ data: names })),
+    http.get('*/api/categories', () =>
+      HttpResponse.json({ data: CATEGORIES_FIXTURE }),
+    ),
+  );
+}
+
 describe('NameDetail', () => {
   it('renders nothing when no name is selected', async () => {
-    server.use(
-      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
-    );
+    seedHandlers();
 
     renderApp(<NameDetail />);
 
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
   });
 
-  it('renders the title and stripped description when a name is selected', async () => {
-    server.use(
-      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
-    );
+  it('renders the stripped description when a name is selected', async () => {
+    seedHandlers();
     useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
     expect(
-      await screen.findByRole('heading', { name: 'Andromeda', level: 2 }),
+      await screen.findByText(/The hero of Homer.*Iliad\./),
     ).toBeInTheDocument();
-    expect(screen.getByText(/The hero of Homer.*Iliad\./)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Andromeda', level: 2 }),
+    ).not.toBeInTheDocument();
   });
 
   it('shows the top-3 related names dash-joined in overlap-then-alpha order', async () => {
-    server.use(
-      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
-    );
+    seedHandlers();
     useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
-    await screen.findByRole('heading', { name: 'Andromeda' });
     await waitFor(() => {
       expect(screen.getByText('Apollo - Ares - Atlas')).toBeInTheDocument();
     });
@@ -90,38 +104,56 @@ describe('NameDetail', () => {
   });
 
   it('updates document.title to "{name} - Pet Names" when selected', async () => {
-    server.use(
-      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
-    );
+    seedHandlers();
     useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
-    await screen.findByRole('heading', { name: 'Andromeda' });
+    await screen.findByText(/The hero of Homer/);
     await waitFor(() => {
       expect(document.title).toBe('Andromeda - Pet Names');
     });
   });
 
-  it('moves focus to the heading when a name is selected', async () => {
-    server.use(
-      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
-    );
+  it('renders the gender glyph + macro - raw row as the first detail row', async () => {
+    // Andromeda has gender ['F'] and categories [Cartoon, Disney]; Cartoon
+    // wins the alpha tiebreak. Both map to the Famous macro.
+    seedHandlers();
     useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     renderApp(<NameDetail />);
 
-    const heading = await screen.findByRole('heading', {
-      name: 'Andromeda',
-      level: 2,
+    const glyph = await screen.findByRole('img', { name: 'Female' });
+    expect(glyph).toHaveTextContent('\u2640');
+    await waitFor(() => {
+      expect(screen.getByText('Famous - Cartoon')).toBeInTheDocument();
     });
-    await waitFor(() => expect(heading).toHaveFocus());
+  });
+
+  it('shows ♂♀ when gender is empty (Marley) and still resolves macro + raw', async () => {
+    const MARLEY_FIXTURE: RawName[] = [
+      {
+        id: 'marley-id',
+        title: 'Marley',
+        definition: '<p>No gender set.</p>',
+        gender: [],
+        categories: [CELEBRITIES_ID],
+      },
+    ];
+    seedHandlers(MARLEY_FIXTURE);
+    useFilterStore.setState({ selectedNameTitle: 'Marley' });
+
+    renderApp(<NameDetail />);
+
+    const glyph = await screen.findByRole('img', { name: 'Male and female' });
+    expect(glyph).toHaveTextContent('\u2642\u2640');
+    await waitFor(() => {
+      expect(screen.getByText('Famous - Celebrities')).toBeInTheDocument();
+    });
   });
 
   it('Escape clears the selection and restores focus to the list item', async () => {
-    server.use(
-      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
-    );
+    seedHandlers();
     useFilterStore.setState({ selectedNameTitle: 'Andromeda' });
 
     // Stand-in list-item for the focus-restore query to find.
@@ -131,9 +163,7 @@ describe('NameDetail', () => {
     document.body.appendChild(stubItem);
 
     renderApp(<NameDetail />);
-
-    const heading = await screen.findByRole('heading', { name: 'Andromeda' });
-    await waitFor(() => expect(heading).toHaveFocus());
+    await screen.findByText(/The hero of Homer/);
 
     await userEvent.keyboard('{Escape}');
 

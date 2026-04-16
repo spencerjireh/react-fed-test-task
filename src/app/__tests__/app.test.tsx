@@ -81,7 +81,7 @@ describe('App', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Aaron' }));
 
     expect(
-      await screen.findByRole('heading', { name: 'Aaron', level: 2 }),
+      await screen.findByRole('region', { name: 'Selected name details' }),
     ).toBeInTheDocument();
     expect(window.location.search).toMatch(/n=[^&]+/);
   });

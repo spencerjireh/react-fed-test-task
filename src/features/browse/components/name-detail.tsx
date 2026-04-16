@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -8,6 +8,7 @@ import { useRelatedNames } from '../hooks/use-related-names';
 import { useSelectedName } from '../hooks/use-selected-name';
 import { useFilterStore } from '../stores/filter-store';
 
+import { GenderMacroRow } from './gender-macro-row';
 import { ShareActions } from './share-actions';
 
 function restoreFocusToListItem(title: string) {
@@ -23,12 +24,6 @@ export function NameDetail() {
   const setSelectedNameTitle = useFilterStore((s) => s.setSelectedNameTitle);
   const related = useRelatedNames(3);
   const reduce = useReducedMotion();
-
-  // Callback ref: a useEffect keyed on title would fire before the names query
-  // resolves, when the h2 isn't yet in the tree.
-  const focusHeadingOnMount = useCallback((node: HTMLHeadingElement | null) => {
-    if (node) node.focus();
-  }, []);
 
   const currentTitle = current?.title ?? null;
 
@@ -67,17 +62,7 @@ export function NameDetail() {
         transition={transition}
         className="flex flex-col gap-4"
       >
-        <header>
-          <h2
-            ref={focusHeadingOnMount}
-            tabIndex={-1}
-            className="text-[30px] leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2 focus-visible:ring-offset-cream-light"
-          >
-            {current.title}
-          </h2>
-        </header>
-
-        <hr className="border-neutral-light" />
+        <GenderMacroRow name={current} />
 
         <p className="text-[20px] font-light leading-[30px] lg:text-[30px] lg:leading-[55px]">
           {current.definitionText}

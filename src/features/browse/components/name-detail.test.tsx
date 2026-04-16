@@ -9,20 +9,44 @@ import type { RawName } from '../types';
 
 import { NameDetail } from './name-detail';
 
+// Overlap fixture: Andromeda (selected) shares two categories with Apollo,
+// one each with Ares and Atlas, none with Boris. Top-3 should sort by
+// overlap DESC, then title ASC: Apollo, Ares, Atlas.
 const FIXTURE: RawName[] = [
   {
     id: 'andromeda-id',
     title: 'Andromeda',
     definition: '<p>The hero of Homer&rsquo;s Iliad.</p>',
     gender: ['F'],
-    categories: ['shared'],
+    categories: ['cat1', 'cat2'],
   },
   {
-    id: 'athena-id',
-    title: 'Athena',
-    definition: '<p>Goddess of wisdom.</p>',
-    gender: ['F'],
-    categories: ['shared'],
+    id: 'apollo-id',
+    title: 'Apollo',
+    definition: '<p>Greek god of the sun.</p>',
+    gender: ['M'],
+    categories: ['cat1', 'cat2'],
+  },
+  {
+    id: 'atlas-id',
+    title: 'Atlas',
+    definition: '<p>Titan who holds the sky.</p>',
+    gender: ['M'],
+    categories: ['cat1'],
+  },
+  {
+    id: 'ares-id',
+    title: 'Ares',
+    definition: '<p>Greek god of war.</p>',
+    gender: ['M'],
+    categories: ['cat2'],
+  },
+  {
+    id: 'boris-id',
+    title: 'Boris',
+    definition: '<p>Unrelated.</p>',
+    gender: ['M'],
+    categories: ['cat3'],
   },
 ];
 
@@ -51,7 +75,7 @@ describe('NameDetail', () => {
     expect(screen.getByText(/The hero of Homer.*Iliad\./)).toBeInTheDocument();
   });
 
-  it('renders a dash-joined related-name list', async () => {
+  it('shows the top-3 related names dash-joined in overlap-then-alpha order', async () => {
     server.use(
       http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
     );
@@ -61,8 +85,22 @@ describe('NameDetail', () => {
 
     await screen.findByRole('heading', { name: 'Andromeda' });
     await waitFor(() => {
-      expect(screen.getByText(/Athena/)).toBeInTheDocument();
+      expect(screen.getByText('Apollo - Ares - Atlas')).toBeInTheDocument();
     });
-    expect(screen.getByText('Related name')).toBeInTheDocument();
+    expect(screen.queryByText(/Boris/)).not.toBeInTheDocument();
+  });
+
+  it('updates document.title to "{name} - Pet Names" when selected', async () => {
+    server.use(
+      http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
+    );
+    useFilterStore.setState({ selectedNameId: 'andromeda-id' });
+
+    renderApp(<NameDetail />);
+
+    await screen.findByRole('heading', { name: 'Andromeda' });
+    await waitFor(() => {
+      expect(document.title).toBe('Andromeda - Pet Names');
+    });
   });
 });

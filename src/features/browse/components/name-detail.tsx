@@ -1,8 +1,10 @@
-import { Bird, Link2, MessageCircle } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 import { useNames } from '../api/get-names';
 import { useRelatedNames } from '../hooks/use-related-names';
 import { useFilterStore } from '../stores/filter-store';
+
+import { ShareActions } from './share-actions';
 
 export function NameDetail() {
   const selectedNameId = useFilterStore((s) => s.selectedNameId);
@@ -20,6 +22,10 @@ export function NameDetail() {
       aria-label="Selected name details"
       className="flex flex-col gap-4 font-body text-neutral-dark"
     >
+      {/* Nested Helmet with a blank titleTemplate wins over the outer Head
+          and strips the "| Pet Name Finder" suffix for selected-name pages. */}
+      <Helmet titleTemplate="%s" title={`${current.title} - Pet Names`} />
+
       <header>
         <h2 className="text-[30px] leading-tight">{current.title}</h2>
       </header>
@@ -41,14 +47,7 @@ export function NameDetail() {
               : '\u2014'}
           </p>
         </div>
-        <div
-          className="flex items-center gap-3 text-neutral-mid"
-          aria-label="Share actions"
-        >
-          <Link2 size={20} aria-label="Copy link" />
-          <Bird size={20} aria-label="Share on Twitter" />
-          <MessageCircle size={20} aria-label="Share on Messenger" />
-        </div>
+        <ShareActions title={current.title} />
       </div>
     </section>
   );

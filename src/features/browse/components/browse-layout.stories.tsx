@@ -1,21 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useEffect } from 'react';
+
+import { useFilterStore } from '../stores/filter-store';
 
 import { BrowseLayout } from './browse-layout';
 
+function Framed({ selectedId }: { selectedId: string | null }) {
+  useEffect(() => {
+    useFilterStore.setState({ selectedNameId: selectedId });
+  }, [selectedId]);
+  return <BrowseLayout />;
+}
+
 const meta = {
   title: 'Browse/BrowseLayout',
-  component: BrowseLayout,
+  component: Framed,
   parameters: {
     layout: 'fullscreen',
   },
-} satisfies Meta<typeof BrowseLayout>;
+} satisfies Meta<typeof Framed>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Full walking-skeleton shell, MSW-seeded. Uses the global `handlers`
- * array from `.storybook/preview.tsx` — 679 names resolve through the
- * Service Worker and `NameList` hydrates them via TanStack Query.
+ * Cover state. Uses the global MSW handlers from `.storybook/preview.tsx`
+ * (679 names). With `selectedNameId === null`, the hero replaces the
+ * master-detail grid.
  */
-export const Default: Story = {};
+export const CoverState: Story = {
+  args: { selectedId: null },
+};
+
+/**
+ * Master-detail state. `selectedNameId` is set so the list and detail
+ * pane render in place of the hero.
+ */
+export const SelectedName: Story = {
+  args: { selectedId: '019c8a34-3f34-70c8-8f5e-3657bb9b328b' },
+};

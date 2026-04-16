@@ -1,7 +1,9 @@
 import { Head } from '@/components/seo/head';
 
+import { useFilterStore } from '../stores/filter-store';
 import { useFilterUrlSync } from '../stores/use-filter-url-sync';
 
+import { CoverHero } from './cover-hero';
 import { FilterBar } from './filter-bar';
 import { GenderBand } from './gender-band';
 import { LetterStrip } from './letter-strip';
@@ -10,6 +12,7 @@ import { NameList } from './name-list';
 
 export function BrowseLayout() {
   useFilterUrlSync();
+  const selectedNameId = useFilterStore((s) => s.selectedNameId);
 
   return (
     <div className="min-h-screen bg-cream-light">
@@ -29,10 +32,14 @@ export function BrowseLayout() {
           <LetterStrip />
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-8 lg:mt-[40px] lg:grid-cols-[352px_1fr] lg:gap-[100px]">
-          <NameList />
-          <NameDetail />
-        </div>
+        {selectedNameId === null ? (
+          <CoverHero />
+        ) : (
+          <div className="mt-10 grid grid-cols-1 gap-8 lg:mt-[40px] lg:grid-cols-[352px_1fr] lg:gap-[100px]">
+            <NameList />
+            <NameDetail />
+          </div>
+        )}
       </main>
     </div>
   );

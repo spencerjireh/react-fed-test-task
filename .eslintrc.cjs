@@ -122,9 +122,22 @@ module.exports = {
       },
     },
     {
+      // Playwright specs; RTL + jest-dom rules don't apply here. `page.getByRole`
+      // is a Playwright locator, not an RTL destructured query, and
+      // `async ({}, testInfo) =>` is Playwright's hook signature idiom.
       files: ['e2e/**/*.ts'],
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
+        'no-empty-pattern': 'off',
+        'testing-library/prefer-screen-queries': 'off',
+        'testing-library/no-await-sync-events': 'off',
+        'testing-library/no-node-access': 'off',
+        'testing-library/no-container': 'off',
+        // jest-dom matchers are DOM-node matchers; Playwright uses its own
+        // assertion surface on locators.
+        'jest-dom/prefer-checked': 'off',
+        'jest-dom/prefer-in-document': 'off',
+        'jest-dom/prefer-to-have-attribute': 'off',
       },
     },
   ],

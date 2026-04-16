@@ -36,8 +36,6 @@ module.exports = {
         'plugin:react-hooks/recommended',
         'plugin:jsx-a11y/recommended',
         'plugin:prettier/recommended',
-        'plugin:testing-library/react',
-        'plugin:jest-dom/recommended',
         'plugin:tailwindcss/recommended',
         'plugin:vitest/legacy-recommended',
       ],
@@ -122,22 +120,29 @@ module.exports = {
       },
     },
     {
-      // Playwright specs; RTL + jest-dom rules don't apply here. `page.getByRole`
-      // is a Playwright locator, not an RTL destructured query, and
-      // `async ({}, testInfo) =>` is Playwright's hook signature idiom.
+      // Unit / integration tests under src/ use React Testing Library + jest-dom
+      // matchers. Scoped here so the rules don't fire against Playwright code
+      // under e2e/, whose locator API accidentally shares method names with RTL.
+      files: ['src/**/*.{ts,tsx}'],
+      extends: [
+        'plugin:testing-library/react',
+        'plugin:jest-dom/recommended',
+      ],
+    },
+    {
+      // Playwright specs: use the dedicated plugin. It knows that
+      // `async ({}, testInfo) =>` is fixture-destructuring, that `page.getByRole`
+      // is a locator (not an RTL destructured query), and it adds its own rules
+      // for Playwright-specific bugs (missing await on expect, .only committed,
+      // duplicate test titles).
       files: ['e2e/**/*.ts'],
+      extends: ['plugin:playwright/recommended'],
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
-        'no-empty-pattern': 'off',
-        'testing-library/prefer-screen-queries': 'off',
-        'testing-library/no-await-sync-events': 'off',
-        'testing-library/no-node-access': 'off',
-        'testing-library/no-container': 'off',
-        // jest-dom matchers are DOM-node matchers; Playwright uses its own
-        // assertion surface on locators.
-        'jest-dom/prefer-checked': 'off',
-        'jest-dom/prefer-in-document': 'off',
-        'jest-dom/prefer-to-have-attribute': 'off',
+        // We use `test.skip(testInfo.project.name !== 'X', 'reason')` in
+        // beforeEach for project-level gating (desktop-only vs mobile-only
+        // specs). That's a deliberate routing pattern, not a flagged skip.
+        'playwright/no-skipped-test': 'off',
       },
     },
   ],

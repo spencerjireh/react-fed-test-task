@@ -1,5 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { ErrorBoundary } from 'react-error-boundary';
 
+import { FeatureErrorFallback } from '@/components/errors/feature-error-fallback';
 import { Head } from '@/components/seo/head';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -64,8 +66,12 @@ export function BrowseLayout() {
               transition={fadeTransition}
               className="mt-10 grid grid-cols-1 gap-8 md:mt-[40px] md:grid-cols-[352px_1fr] xl:gap-[100px]"
             >
-              <NameList />
-              {isDesktop ? <NameDetail /> : <NameDetailDialog />}
+              <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+                <NameList />
+              </ErrorBoundary>
+              <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+                {isDesktop ? <NameDetail /> : <NameDetailDialog />}
+              </ErrorBoundary>
             </motion.div>
           )}
         </AnimatePresence>

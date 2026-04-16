@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 
 import { LETTERS } from '@/config/constants';
-import { getJson, setJson } from '@/lib/local-storage';
 import {
   decodeFilterUrlParams,
   encodeFilterUrlParams,
@@ -31,8 +30,6 @@ export interface FilterActions {
 }
 
 export type FilterStore = FilterState & FilterActions;
-
-export const LOCAL_STORAGE_KEY = 'filter-state';
 
 const VALID_MACRO_CATEGORIES: readonly MacroCategory[] = [
   'Famous',
@@ -65,52 +62,6 @@ const DEFAULT_STATE: FilterState = {
   page: 0,
 };
 
-/** Shape stored in localStorage. */
-interface PersistedFilterState {
-  gender: Gender | 'Both';
-  letter: Letter | null;
-  macroCategories: string[];
-  rawCategories: string[];
-  selectedNameTitle: string | null;
-  page: number;
-}
-
-function toPersisted(state: FilterState): PersistedFilterState {
-  return {
-    gender: state.gender,
-    letter: state.letter,
-    macroCategories: [...state.macroCategories],
-    rawCategories: [...state.rawCategories],
-    selectedNameTitle: state.selectedNameTitle,
-    page: state.page,
-  };
-}
-
-function fromPersisted(persisted: PersistedFilterState): FilterState {
-  const gender: Gender | 'Both' =
-    persisted.gender === 'M' || persisted.gender === 'F'
-      ? persisted.gender
-      : 'Both';
-  const letter =
-    persisted.letter && isLetter(persisted.letter) ? persisted.letter : null;
-  return {
-    gender,
-    letter,
-    macroCategories: new Set(
-      (persisted.macroCategories ?? []).filter(isMacroCategory),
-    ),
-    rawCategories: new Set(persisted.rawCategories ?? []),
-    selectedNameTitle:
-      typeof persisted.selectedNameTitle === 'string'
-        ? persisted.selectedNameTitle
-        : null,
-    page:
-      Number.isFinite(persisted.page) && persisted.page >= 0
-        ? persisted.page
-        : 0,
-  };
-}
-
 function fromUrlParams(params: FilterUrlParams): FilterState {
   const gender: Gender | 'Both' =
     params.gender && isGender(params.gender) ? params.gender : 'Both';
@@ -128,32 +79,12 @@ function fromUrlParams(params: FilterUrlParams): FilterState {
   };
 }
 
-/** URL wins over localStorage, then defaults. */
 export function computeInitialState(): FilterState {
   if (typeof window === 'undefined') return DEFAULT_STATE;
-
   const search = window.location.search;
-  if (hasFilterUrlParams(search)) {
-    return fromUrlParams(decodeFilterUrlParams(search));
-  }
-
-  const stored = getJson<PersistedFilterState>(LOCAL_STORAGE_KEY);
-  if (stored) return fromPersisted(stored);
-
-  return DEFAULT_STATE;
-}
-
-/** Mirror state into localStorage after every mutation. Best-effort. */
-function persist(state: FilterState): void {
-  setJson(LOCAL_STORAGE_KEY, toPersisted(state));
-}
-
-function withPersist<P extends Partial<FilterState>>(
-  state: FilterState,
-  patch: P,
-): P {
-  persist({ ...state, ...patch });
-  return patch;
+  return hasFilterUrlParams(search)
+    ? fromUrlParams(decodeFilterUrlParams(search))
+    : DEFAULT_STATE;
 }
 
 export function serializeFilterStateToUrl(state: FilterState): string {
@@ -174,16 +105,16 @@ export function serializeFilterStateToUrl(state: FilterState): string {
 export const useFilterStore = create<FilterStore>((set) => ({
   ...computeInitialState(),
 
-  setGender: (gender) => set((s) => withPersist(s, { gender })),
+  setGender: (gender) => set({ gender }),
 
-  setLetter: (letter) => set((s) => withPersist(s, { letter })),
+  setLetter: (letter) => set({ letter }),
 
   toggleMacro: (macro) =>
     set((s) => {
       const next = new Set(s.macroCategories);
       if (next.has(macro)) next.delete(macro);
       else next.add(macro);
-      return withPersist(s, { macroCategories: next });
+      return { macroCategories: next };
     }),
 
   toggleRaw: (rawCategoryId) =>
@@ -191,22 +122,19 @@ export const useFilterStore = create<FilterStore>((set) => ({
       const next = new Set(s.rawCategories);
       if (next.has(rawCategoryId)) next.delete(rawCategoryId);
       else next.add(rawCategoryId);
-      return withPersist(s, { rawCategories: next });
+      return { rawCategories: next };
     }),
 
-  setSelectedNameTitle: (selectedNameTitle) =>
-    set((s) => withPersist(s, { selectedNameTitle })),
+  setSelectedNameTitle: (selectedNameTitle) => set({ selectedNameTitle }),
 
-  setPage: (page) => set((s) => withPersist(s, { page })),
+  setPage: (page) => set({ page }),
 
   clearFilters: () =>
-    set((s) =>
-      withPersist(s, {
-        gender: 'Both',
-        letter: null,
-        macroCategories: new Set(),
-        rawCategories: new Set(),
-        page: 0,
-      }),
-    ),
+    set({
+      gender: 'Both',
+      letter: null,
+      macroCategories: new Set(),
+      rawCategories: new Set(),
+      page: 0,
+    }),
 }));

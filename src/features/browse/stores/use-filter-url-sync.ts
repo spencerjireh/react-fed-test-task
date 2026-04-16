@@ -8,7 +8,6 @@ export function useFilterUrlSync(): void {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Sync the current store state on mount in case it came from localStorage.
     const initialQuery = serializeFilterStateToUrl(useFilterStore.getState());
     navigate(
       { search: initialQuery ? `?${initialQuery}` : '' },

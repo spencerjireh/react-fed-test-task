@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
   computeInitialState,
-  LOCAL_STORAGE_KEY,
   serializeFilterStateToUrl,
   useFilterStore,
 } from '../filter-store';
@@ -14,11 +13,10 @@ function resetUrl(): void {
 
 beforeEach(() => {
   resetUrl();
-  window.localStorage.clear();
 });
 
 describe('computeInitialState', () => {
-  it('defaults to Both/null/empty when no URL or localStorage state exists', () => {
+  it('defaults to Both/null/empty when the URL has no filter params', () => {
     const state = computeInitialState();
     expect(state.gender).toBe('Both');
     expect(state.letter).toBeNull();
@@ -28,45 +26,13 @@ describe('computeInitialState', () => {
     expect(state.page).toBe(0);
   });
 
-  it('hydrates from URL when filter keys are present (URL wins over storage)', () => {
+  it('hydrates from URL when filter keys are present', () => {
     window.history.replaceState({}, '', '/?g=F&l=C&mc=Famous,Funny&p=2');
-    window.localStorage.setItem(
-      LOCAL_STORAGE_KEY,
-      JSON.stringify({
-        gender: 'M',
-        letter: 'Z',
-        macroCategories: ['Joyful'],
-        rawCategories: [],
-        selectedNameTitle: null,
-        page: 9,
-      }),
-    );
     const state = computeInitialState();
     expect(state.gender).toBe('F');
     expect(state.letter).toBe('C');
     expect(state.macroCategories).toEqual(new Set(['Famous', 'Funny']));
     expect(state.page).toBe(2);
-  });
-
-  it('hydrates from localStorage when URL has no filter keys', () => {
-    window.localStorage.setItem(
-      LOCAL_STORAGE_KEY,
-      JSON.stringify({
-        gender: 'M',
-        letter: 'A',
-        macroCategories: ['Famous'],
-        rawCategories: ['raw-1'],
-        selectedNameTitle: 'name-1',
-        page: 4,
-      }),
-    );
-    const state = computeInitialState();
-    expect(state.gender).toBe('M');
-    expect(state.letter).toBe('A');
-    expect(state.macroCategories).toEqual(new Set(['Famous']));
-    expect(state.rawCategories).toEqual(new Set(['raw-1']));
-    expect(state.selectedNameTitle).toBe('name-1');
-    expect(state.page).toBe(4);
   });
 
   it('drops invalid URL values (unknown gender, unknown macro)', () => {
@@ -75,22 +41,12 @@ describe('computeInitialState', () => {
     expect(state.gender).toBe('Both');
     expect(state.macroCategories).toEqual(new Set(['Famous', 'Joyful']));
   });
-
-  it('drops invalid localStorage payloads gracefully', () => {
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, '{not-json');
-    expect(() => computeInitialState()).not.toThrow();
-    expect(computeInitialState().gender).toBe('Both');
-  });
 });
 
 describe('useFilterStore actions', () => {
-  it('setGender updates the store and mirrors to localStorage', () => {
+  it('setGender updates the store', () => {
     act(() => useFilterStore.getState().setGender('F'));
     expect(useFilterStore.getState().gender).toBe('F');
-    const stored = JSON.parse(
-      window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}',
-    );
-    expect(stored.gender).toBe('F');
   });
 
   it('setLetter updates the store', () => {
@@ -155,20 +111,6 @@ describe('useFilterStore actions', () => {
     expect(s.page).toBe(0);
     // selectedNameTitle persists so the open detail pane doesn't get dismissed.
     expect(s.selectedNameTitle).toBe('name-123');
-  });
-
-  it('mirrors to localStorage on every mutation', () => {
-    act(() => {
-      useFilterStore.getState().toggleMacro('Joyful');
-      useFilterStore.getState().toggleRaw('raw-xyz');
-      useFilterStore.getState().setGender('F');
-    });
-    const stored = JSON.parse(
-      window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}',
-    );
-    expect(stored.gender).toBe('F');
-    expect(stored.macroCategories).toContain('Joyful');
-    expect(stored.rawCategories).toContain('raw-xyz');
   });
 });
 

@@ -1,22 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { http, HttpResponse } from 'msw';
 import { useEffect } from 'react';
 
 import { useFilterStore } from '../stores/filter-store';
-import type { Letter, RawName } from '../types';
+import type { Letter } from '../types';
 
 import { LetterStrip } from './letter-strip';
-
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-// Cover A-Z so only Ñ renders disabled.
-const FIXTURE: RawName[] = ALPHABET.split('').map((ch) => ({
-  id: `${ch.toLowerCase()}-id`,
-  title: `${ch}name`,
-  definition: `<p>${ch}name</p>`,
-  gender: ['F'],
-  categories: [],
-}));
 
 function Framed({ initialLetter }: { initialLetter: Letter | null }) {
   useEffect(() => {
@@ -39,14 +27,7 @@ function Framed({ initialLetter }: { initialLetter: Letter | null }) {
 const meta = {
   title: 'Browse/LetterStrip',
   component: Framed,
-  parameters: {
-    layout: 'fullscreen',
-    msw: {
-      handlers: [
-        http.get('*/api/names', () => HttpResponse.json({ data: FIXTURE })),
-      ],
-    },
-  },
+  parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof Framed>;
 
 export default meta;

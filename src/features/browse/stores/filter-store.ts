@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 
-import { LETTERS } from '@/config/constants';
 import {
   decodeFilterUrlParams,
   encodeFilterUrlParams,
@@ -50,7 +49,7 @@ function isGender(value: string): value is Gender {
 }
 
 function isLetter(value: string): value is Letter {
-  return (LETTERS as readonly string[]).includes(value);
+  return value.length > 0;
 }
 
 const DEFAULT_STATE: FilterState = {

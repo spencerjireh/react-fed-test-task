@@ -17,7 +17,6 @@ const circle = cva(
       state: {
         default: 'bg-transparent text-neutral-dark hover:bg-neutral-light/40',
         selected: 'bg-red-main text-white',
-        disabled: 'cursor-not-allowed bg-transparent text-neutral-light',
       },
     },
   },
@@ -28,24 +27,20 @@ type CircleState = NonNullable<VariantProps<typeof circle>['state']>;
 interface LetterCircleProps {
   letter: Letter;
   isSelected: boolean;
-  isDisabled: boolean;
   onSelect: (letter: Letter) => void;
   isTabbable: boolean;
   ref?: Ref<HTMLButtonElement>;
   className?: string;
 }
 
-function resolveState(isDisabled: boolean, isSelected: boolean): CircleState {
-  if (isDisabled) return 'disabled';
-  if (isSelected) return 'selected';
-  return 'default';
+function resolveState(isSelected: boolean): CircleState {
+  return isSelected ? 'selected' : 'default';
 }
 
 export function LetterCircle({
   ref,
   letter,
   isSelected,
-  isDisabled,
   onSelect,
   isTabbable,
   className,
@@ -56,18 +51,11 @@ export function LetterCircle({
       type="button"
       role="tab"
       aria-selected={isSelected}
-      aria-disabled={isDisabled}
       aria-label={`Filter by letter ${letter}`}
       tabIndex={isTabbable ? 0 : -1}
       data-letter={letter}
-      onClick={() => {
-        if (isDisabled) return;
-        onSelect(letter);
-      }}
-      className={cn(
-        circle({ state: resolveState(isDisabled, isSelected) }),
-        className,
-      )}
+      onClick={() => onSelect(letter)}
+      className={cn(circle({ state: resolveState(isSelected) }), className)}
     >
       {letter}
     </button>

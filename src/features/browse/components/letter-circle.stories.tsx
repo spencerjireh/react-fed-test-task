@@ -24,13 +24,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: { isSelected: false, isDisabled: false },
+  args: { isSelected: false },
 };
 
 export const Selected: Story = {
-  args: { isSelected: true, isDisabled: false },
-};
-
-export const Disabled: Story = {
-  args: { letter: 'Ñ', isSelected: false, isDisabled: true, isTabbable: false },
+  args: { isSelected: true },
 };

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
 
 import { useFilterStore } from '../stores/filter-store';
-import type { MacroCategory, RawCategory } from '../types';
+import type { RawCategory } from '../types';
 
 import { CategoryDropdown } from './category-dropdown';
 
@@ -14,19 +14,18 @@ const MOST_POPULAR_ID = '019c8a34-3611-73a8-90ac-bbacd3959385';
 const MUSICAL_ID = '019c8a34-3614-71a6-b955-df5540ecdfce';
 
 const FAMOUS_RAWS: RawCategory[] = [
-  { id: CARTOON_ID, name: 'Cartoon', description: null },
-  { id: CELEBRITIES_ID, name: 'Celebrities', description: null },
-  { id: DISNEY_ID, name: 'Disney', description: null },
-  { id: LITERARY_ID, name: 'Literary', description: null },
-  { id: MOST_POPULAR_ID, name: 'Most Popular', description: null },
-  { id: MUSICAL_ID, name: 'Musical', description: null },
+  { id: CARTOON_ID, name: 'Cartoon' },
+  { id: CELEBRITIES_ID, name: 'Celebrities' },
+  { id: DISNEY_ID, name: 'Disney' },
+  { id: LITERARY_ID, name: 'Literary' },
+  { id: MOST_POPULAR_ID, name: 'Most Popular' },
+  { id: MUSICAL_ID, name: 'Musical' },
 ];
 
-function resetStore(macros: Set<MacroCategory>, raws: Set<string>) {
+function resetStore(raws: Set<string>) {
   useFilterStore.setState({
     gender: 'Both',
     letter: null,
-    macroCategories: macros,
     rawCategories: raws,
     selectedNameTitle: null,
   });
@@ -54,7 +53,7 @@ const meta = {
     ),
   ],
   beforeEach: () => {
-    resetStore(new Set(), new Set());
+    resetStore(new Set());
   },
 } satisfies Meta<typeof CategoryDropdown>;
 
@@ -70,15 +69,12 @@ export const Open: Story = {
 export const OpenWithSelections: Story = {
   args: { isOpen: true },
   beforeEach: () => {
-    resetStore(new Set(), new Set([CARTOON_ID, DISNEY_ID]));
+    resetStore(new Set([CARTOON_ID, DISNEY_ID]));
   },
 };
 
 export const ClosedWithSelections: Story = {
   beforeEach: () => {
-    resetStore(
-      new Set<MacroCategory>(['Famous']),
-      new Set(FAMOUS_RAWS.map((r) => r.id)),
-    );
+    resetStore(new Set(FAMOUS_RAWS.map((r) => r.id)));
   },
 };

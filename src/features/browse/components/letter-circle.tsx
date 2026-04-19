@@ -1,8 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { Ref } from 'react';
 
-import { cn } from '@/utils/cn';
-
 import type { Letter } from '../types';
 
 const circle = cva(
@@ -30,7 +28,6 @@ interface LetterCircleProps {
   onSelect: (letter: Letter) => void;
   isTabbable: boolean;
   ref?: Ref<HTMLButtonElement>;
-  className?: string;
 }
 
 function resolveState(isSelected: boolean): CircleState {
@@ -43,7 +40,6 @@ export function LetterCircle({
   isSelected,
   onSelect,
   isTabbable,
-  className,
 }: LetterCircleProps) {
   return (
     <button
@@ -55,7 +51,7 @@ export function LetterCircle({
       tabIndex={isTabbable ? 0 : -1}
       data-letter={letter}
       onClick={() => onSelect(letter)}
-      className={cn(circle({ state: resolveState(isSelected) }), className)}
+      className={circle({ state: resolveState(isSelected) })}
     >
       {letter}
     </button>

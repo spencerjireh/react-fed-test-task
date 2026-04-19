@@ -5,19 +5,12 @@ import { describeFilters } from '../utils/describe-filters';
 export function EmptyResults() {
   const gender = useFilterStore((s) => s.gender);
   const letter = useFilterStore((s) => s.letter);
-  const macroCategories = useFilterStore((s) => s.macroCategories);
   const rawCategories = useFilterStore((s) => s.rawCategories);
   const clearFilters = useFilterStore((s) => s.clearFilters);
 
   const { data: categories } = useCategories();
 
-  const subline = describeFilters(
-    gender,
-    letter,
-    macroCategories,
-    rawCategories,
-    categories,
-  );
+  const subline = describeFilters(gender, letter, rawCategories, categories);
 
   return (
     <div

@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { type ListRange, Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,6 +41,11 @@ export function NameList({
   // Seed 0 so the first paint centers before rangeChanged fires.
   const [centerIndex, setCenterIndex] = useState(0);
 
+  const titleToIndex = useMemo(
+    () => new Map(filtered.map((n, i) => [n.title, i])),
+    [filtered],
+  );
+
   if (isPending) return <NameListSkeleton />;
   if (isError) {
     return (
@@ -49,6 +54,7 @@ export function NameList({
       </p>
     );
   }
+
   const anchor = selectedNameTitle
     ? Math.max(
         0,
@@ -85,7 +91,7 @@ export function NameList({
     const focused = document.activeElement as HTMLElement | null;
     const currentTitle = focused?.getAttribute('data-name-title');
     const currentIndex = currentTitle
-      ? filtered.findIndex((n) => n.title === currentTitle)
+      ? (titleToIndex.get(currentTitle) ?? -1)
       : -1;
     if (currentIndex === -1) return;
 

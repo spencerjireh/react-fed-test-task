@@ -51,9 +51,9 @@ describe('decorateName', () => {
     expect(name.macroCategories).toHaveLength(3);
   });
 
-  it("falls through unmapped raw category IDs to 'Others'", () => {
+  it('returns an empty macros list for unmapped raw category IDs', () => {
     const name = decorateName(buildRaw({ categories: [UNKNOWN_ID] }));
-    expect(name.macroCategories).toEqual(['Others']);
+    expect(name.macroCategories).toEqual([]);
   });
 
   it('preserves every RawName field on the resulting Name', () => {

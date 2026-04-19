@@ -10,7 +10,6 @@ describe('ResultsPane', () => {
     useFilterStore.setState({
       gender: 'M',
       letter: 'A',
-      macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
     });
@@ -42,7 +41,6 @@ describe('ResultsPane', () => {
     const state = useFilterStore.getState();
     expect(state.gender).toBe('Both');
     expect(state.letter).toBeNull();
-    expect(state.macroCategories.size).toBe(0);
     expect(state.rawCategories.size).toBe(0);
     expect(state.selectedNameTitle).toBeNull();
   });

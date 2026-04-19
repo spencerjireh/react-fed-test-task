@@ -12,8 +12,8 @@ const CARTOON_ID = '019c8a34-3585-7249-b7c2-a4f85945291e';
 const OPTIMISTIC_ID = '019c8a34-3619-7134-a023-806d72219174';
 
 const CATEGORIES_FIXTURE: RawCategory[] = [
-  { id: CARTOON_ID, name: 'Cartoon', description: null },
-  { id: OPTIMISTIC_ID, name: 'Optimistic', description: null },
+  { id: CARTOON_ID, name: 'Cartoon' },
+  { id: OPTIMISTIC_ID, name: 'Optimistic' },
 ];
 
 describe('FilterBar', () => {
@@ -21,7 +21,6 @@ describe('FilterBar', () => {
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
-      macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
     });

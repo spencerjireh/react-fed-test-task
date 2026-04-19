@@ -1,6 +1,9 @@
-import type { Gender, Letter, MacroCategory, RawCategory } from '../types';
+import type { Gender, Letter, RawCategory } from '../types';
 
-import { getRawIdsCoveredByMacros } from './macro-category-map';
+import {
+  getFullyCheckedMacros,
+  getRawIdsCoveredByMacros,
+} from './macro-category-map';
 
 const GENDER_WORDS: Record<Gender | 'Both', string> = {
   M: 'Male ',
@@ -13,12 +16,10 @@ const LIST_FORMAT = new Intl.ListFormat('en-US', { type: 'conjunction' });
 export function describeFilters(
   gender: Gender | 'Both',
   letter: Letter | null,
-  macroCategories: Set<MacroCategory>,
-  rawCategories: Set<string>,
+  rawCategories: ReadonlySet<string>,
   rawData: RawCategory[] | undefined,
 ): string {
-  const macros = [...macroCategories];
-
+  const macros = [...getFullyCheckedMacros(rawCategories)];
   const coveredByMacro = getRawIdsCoveredByMacros(macros);
 
   const standaloneRawNames = [...rawCategories]

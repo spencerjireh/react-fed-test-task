@@ -2,7 +2,7 @@ import type { KeyboardEventHandler, ReactNode, Ref } from 'react';
 import { useImperativeHandle } from 'react';
 import { vi } from 'vitest';
 
-export interface VirtuosoListRange {
+interface VirtuosoListRange {
   startIndex: number;
   endIndex: number;
 }

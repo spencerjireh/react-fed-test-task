@@ -10,7 +10,6 @@ function resetStore(letter: Letter | null) {
   useFilterStore.setState({
     gender: 'Both',
     letter,
-    macroCategories: new Set(),
     rawCategories: new Set(),
     selectedNameTitle: null,
   });

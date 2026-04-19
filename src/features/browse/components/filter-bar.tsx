@@ -32,6 +32,7 @@ export function FilterBar() {
     setOpenMacro((current) => (current === macro ? null : macro));
   };
 
+  // LetterStrip carries the same data-filter-chrome marker; clicks there keep this dropdown open.
   return (
     <section
       data-filter-chrome

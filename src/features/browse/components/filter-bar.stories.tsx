@@ -2,17 +2,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
 import { useFilterStore } from '../stores/filter-store';
-import type { MacroCategory } from '../types';
 
 import { FilterBar } from './filter-bar';
 
 const DRINKS_ID = '019c8a34-35f6-70a9-bda7-5f0eaf8a07d5';
 
-function resetStore(macros: Set<MacroCategory>, raws: Set<string>) {
+function resetStore(raws: Set<string>) {
   useFilterStore.setState({
     gender: 'Both',
     letter: null,
-    macroCategories: macros,
     rawCategories: raws,
     selectedNameTitle: null,
   });
@@ -30,7 +28,7 @@ const meta = {
     ),
   ],
   beforeEach: () => {
-    resetStore(new Set(), new Set());
+    resetStore(new Set());
   },
 } satisfies Meta<typeof FilterBar>;
 
@@ -41,13 +39,13 @@ export const Default: Story = {};
 
 export const WithActive: Story = {
   beforeEach: () => {
-    resetStore(new Set<MacroCategory>(['Famous']), new Set([DRINKS_ID]));
+    resetStore(new Set([DRINKS_ID]));
   },
 };
 
 export const StripOpen: Story = {
   beforeEach: () => {
-    resetStore(new Set(), new Set([DRINKS_ID]));
+    resetStore(new Set([DRINKS_ID]));
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

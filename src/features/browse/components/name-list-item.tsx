@@ -1,5 +1,5 @@
 import { cva } from 'class-variance-authority';
-import type { Ref } from 'react';
+import { memo } from 'react';
 
 import type { Name } from '../types';
 
@@ -48,13 +48,11 @@ interface NameListItemProps {
   name: Name;
   isSelected: boolean;
   onSelect: (title: string) => void;
-  ref?: Ref<HTMLButtonElement>;
   isCentered?: boolean;
   variant?: 'detail' | 'results';
 }
 
-export function NameListItem({
-  ref,
+export const NameListItem = memo(function NameListItem({
   name,
   isSelected,
   onSelect,
@@ -65,7 +63,6 @@ export function NameListItem({
 
   return (
     <button
-      ref={ref}
       type="button"
       data-name-title={name.title}
       onClick={() => onSelect(name.title)}
@@ -74,4 +71,4 @@ export function NameListItem({
       {name.title}
     </button>
   );
-}
+});

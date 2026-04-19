@@ -8,7 +8,6 @@ interface ChevronButtonProps {
   disabled: boolean;
   onClick: () => void;
   'aria-label': string;
-  className?: string;
 }
 
 // SVG inlined so stroke="currentColor" picks up text-* classes.
@@ -17,7 +16,6 @@ export function ChevronButton({
   disabled,
   onClick,
   'aria-label': ariaLabel,
-  className,
 }: ChevronButtonProps) {
   const reduce = useReducedMotion();
   const hoverScale = reduce || disabled ? 1 : 1.05;
@@ -34,7 +32,6 @@ export function ChevronButton({
         'flex h-12 w-12 items-center justify-center',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2 focus-visible:ring-offset-cream-light',
         disabled ? 'cursor-not-allowed text-neutral-light' : 'text-red-main',
-        className,
       )}
     >
       <svg

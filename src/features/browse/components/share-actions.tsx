@@ -25,12 +25,10 @@ export function ShareActions({ title }: ShareActionsProps) {
     };
   }, []);
 
-  const href = typeof window !== 'undefined' ? window.location.href : '';
-
   const handleCopyLink = async () => {
     if (!navigator.clipboard) return;
     try {
-      await navigator.clipboard.writeText(href);
+      await navigator.clipboard.writeText(window.location.href);
     } catch {
       return;
     }
@@ -46,12 +44,12 @@ export function ShareActions({ title }: ShareActionsProps) {
 
   const handleTweet = () => {
     const tweetText = `I found the perfect pet name: ${title}`;
-    const url = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(href)}`;
+    const url = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(window.location.href)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleMessenger = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(href)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -86,14 +84,11 @@ type ShareButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   'aria-label': string;
 };
 
-function ShareButton({ children, className, ...props }: ShareButtonProps) {
+function ShareButton({ children, ...props }: ShareButtonProps) {
   return (
     <button
       type="button"
-      className={cn(
-        'rounded-full transition-colors hover:text-red-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2',
-        className,
-      )}
+      className="rounded-full transition-colors hover:text-red-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-main focus-visible:ring-offset-2"
       {...props}
     >
       {children}

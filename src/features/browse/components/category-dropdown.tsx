@@ -43,7 +43,6 @@ export function CategoryDropdown({
   isOpen,
   onToggle,
 }: CategoryDropdownProps) {
-  const macroCategories = useFilterStore((s) => s.macroCategories);
   const rawCategories = useFilterStore((s) => s.rawCategories);
 
   const { data: categories } = useCategories();
@@ -52,8 +51,7 @@ export function CategoryDropdown({
     [macro, categories],
   );
 
-  const hasSelection =
-    macroCategories.has(macro) || raws.some((r) => rawCategories.has(r.id));
+  const hasSelection = raws.some((r) => rawCategories.has(r.id));
 
   return (
     <button

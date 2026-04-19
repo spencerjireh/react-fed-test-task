@@ -10,9 +10,9 @@ const CELEBRITIES_ID = '019c8a34-35ed-737c-acff-a43af999817c';
 const DRINKS_ID = '019c8a34-35f6-70a9-bda7-5f0eaf8a07d5';
 
 const CATEGORIES: RawCategory[] = [
-  { id: CARTOON_ID, name: 'Cartoon', description: null },
-  { id: CELEBRITIES_ID, name: 'Celebrities', description: null },
-  { id: DRINKS_ID, name: 'Drinks', description: null },
+  { id: CARTOON_ID, name: 'Cartoon' },
+  { id: CELEBRITIES_ID, name: 'Celebrities' },
+  { id: DRINKS_ID, name: 'Drinks' },
 ];
 
 function buildName(partial: Partial<Name>): Name {

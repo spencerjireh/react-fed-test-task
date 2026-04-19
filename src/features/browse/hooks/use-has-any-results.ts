@@ -2,15 +2,16 @@ import { useMemo } from 'react';
 
 import { useFilterStore } from '../stores/filter-store';
 import type { Name } from '../types';
-import { filterNames } from '../utils/filter-names';
+import { matchesFilters } from '../utils/filter-names';
 
-export function useFilteredNames(names: Name[]): Name[] {
+export function useHasAnyResults(names: Name[]): boolean {
   const gender = useFilterStore((s) => s.gender);
   const letter = useFilterStore((s) => s.letter);
   const rawCategories = useFilterStore((s) => s.rawCategories);
 
   return useMemo(
-    () => filterNames(names, { gender, letter, rawCategories }),
+    () =>
+      names.some((n) => matchesFilters(n, { gender, letter, rawCategories })),
     [names, gender, letter, rawCategories],
   );
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { FilterState } from '../../stores/filter-store';
-import type { MacroCategory, Name } from '../../types';
+import type { Name } from '../../types';
 import { filterNames } from '../filter-names';
 
 // Small fixture set for each filter branch.
@@ -22,16 +22,12 @@ function buildName(
 
 function buildState(
   overrides: Partial<
-    Pick<FilterState, 'gender' | 'letter' | 'macroCategories' | 'rawCategories'>
+    Pick<FilterState, 'gender' | 'letter' | 'rawCategories'>
   > = {},
-): Pick<
-  FilterState,
-  'gender' | 'letter' | 'macroCategories' | 'rawCategories'
-> {
+): Pick<FilterState, 'gender' | 'letter' | 'rawCategories'> {
   return {
     gender: 'Both',
     letter: null,
-    macroCategories: new Set<MacroCategory>(),
     rawCategories: new Set<string>(),
     ...overrides,
   };
@@ -103,32 +99,23 @@ describe('filterNames — letter', () => {
 });
 
 describe('filterNames — categories', () => {
-  it('no filter returns everything when macroCategories and rawCategories are empty', () => {
+  it('no filter returns everything when rawCategories are empty', () => {
     expect(filterNames(names, buildState())).toHaveLength(4);
   });
 
-  it('macro filter matches on macro categories', () => {
+  it('rawCategories restricts to names whose categories intersect the set', () => {
     const result = filterNames(
       names,
-      buildState({ macroCategories: new Set<MacroCategory>(['Joyful']) }),
+      buildState({ rawCategories: new Set(['cat-optimistic']) }),
     );
     expect(result.map((n) => n.id)).toEqual(['marley']);
   });
 
-  it('raw filter matches on raw category ids', () => {
-    const result = filterNames(
-      names,
-      buildState({ rawCategories: new Set(['cat-greek']) }),
-    );
-    expect(result.map((n) => n.id)).toEqual(['andromeda']);
-  });
-
-  it('OR semantics: macro OR raw filter matches either', () => {
+  it('multiple raws OR within the category axis', () => {
     const result = filterNames(
       names,
       buildState({
-        macroCategories: new Set<MacroCategory>(['Joyful']),
-        rawCategories: new Set(['cat-greek']),
+        rawCategories: new Set(['cat-optimistic', 'cat-greek']),
       }),
     );
     expect(new Set(result.map((n) => n.id))).toEqual(
@@ -144,7 +131,7 @@ describe('filterNames — composition', () => {
       buildState({
         gender: 'F',
         letter: 'A',
-        macroCategories: new Set<MacroCategory>(['International']),
+        rawCategories: new Set(['cat-greek']),
       }),
     );
     expect(result.map((n) => n.id)).toEqual(['andromeda']);
@@ -156,7 +143,7 @@ describe('filterNames — composition', () => {
         names,
         buildState({
           letter: 'Z',
-          macroCategories: new Set<MacroCategory>(['Joyful']),
+          rawCategories: new Set(['cat-optimistic']),
         }),
       ),
     ).toEqual([]);

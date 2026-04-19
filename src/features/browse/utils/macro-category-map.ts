@@ -2,24 +2,18 @@ import categoriesJson from '@/testing/mocks/data/categories.json';
 
 import {
   isMacroCategory,
+  MACRO_CATEGORIES,
   type MacroCategory,
   type RawCategory,
 } from '../types';
 
 interface FilterGroup {
-  id: string;
   label: string;
   categoryIds: string[];
 }
 
-interface RawCategoryRow {
-  id: string;
-  name: string;
-  description: string | null;
-}
-
 const FILTER_GROUPS = categoriesJson.filterGroups as FilterGroup[];
-const RAW_CATEGORIES = categoriesJson.data as RawCategoryRow[];
+const RAW_CATEGORIES = categoriesJson.data as RawCategory[];
 
 const RAW_ID_TO_NAME: Record<string, string> = (() => {
   const map: Record<string, string> = {};
@@ -53,10 +47,8 @@ const MACRO_TO_RAW_IDS: Record<MacroCategory, readonly string[]> = (() => {
   return map as Record<MacroCategory, readonly string[]>;
 })();
 
-const OTHERS_FALLBACK: readonly MacroCategory[] = ['Others'];
-
 export function getMacrosFor(rawCategoryId: string): readonly MacroCategory[] {
-  return CATEGORY_ID_TO_MACROS[rawCategoryId] ?? OTHERS_FALLBACK;
+  return CATEGORY_ID_TO_MACROS[rawCategoryId] ?? [];
 }
 
 export function getRawsForMacro(
@@ -88,4 +80,18 @@ export function getRawNameForId(id: string): string | undefined {
 
 export function getRawIdForName(name: string): string | undefined {
   return RAW_NAME_TO_ID[name];
+}
+
+export function getFullyCheckedMacros(
+  rawCategories: ReadonlySet<string>,
+): Set<MacroCategory> {
+  const next = new Set<MacroCategory>();
+  for (const macro of MACRO_CATEGORIES) {
+    const childIds = getRawIdsForMacro(macro);
+    if (childIds.length === 0) continue;
+    if (childIds.every((id) => rawCategories.has(id))) {
+      next.add(macro);
+    }
+  }
+  return next;
 }

@@ -1,8 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { Ref } from 'react';
 
-import { cn } from '@/utils/cn';
-
 import type { Gender } from '../types';
 
 export type GenderValue = Gender | 'Both';
@@ -30,7 +28,6 @@ interface GenderPillProps extends VariantProps<typeof pill> {
   isSelected: boolean;
   onSelect: (value: GenderValue) => void;
   ref?: Ref<HTMLButtonElement>;
-  className?: string;
 }
 
 export function GenderPill({
@@ -39,7 +36,6 @@ export function GenderPill({
   label,
   isSelected,
   onSelect,
-  className,
 }: GenderPillProps) {
   return (
     <button
@@ -50,7 +46,7 @@ export function GenderPill({
       tabIndex={isSelected ? 0 : -1}
       data-value={value}
       onClick={() => onSelect(value)}
-      className={cn(pill({ selected: isSelected }), className)}
+      className={pill({ selected: isSelected })}
     >
       {label}
     </button>

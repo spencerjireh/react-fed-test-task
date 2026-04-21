@@ -30,7 +30,6 @@ describe('NameDetailDialog', () => {
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
-      macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
     });

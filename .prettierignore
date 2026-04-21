@@ -1,4 +1,3 @@
-*.hbs
 playwright-report/
 test-results/
 storybook-static/

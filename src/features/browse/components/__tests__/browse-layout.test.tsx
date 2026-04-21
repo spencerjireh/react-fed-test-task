@@ -49,7 +49,6 @@ describe('BrowseLayout', () => {
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
-      macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
     });
@@ -149,7 +148,7 @@ describe('BrowseLayout', () => {
     useFilterStore.setState({
       gender: 'F',
       letter: 'Z',
-      macroCategories: new Set(['Famous']),
+      rawCategories: new Set(['019c8a34-3585-7249-b7c2-a4f85945291e']),
     });
 
     renderApp(<BrowseLayout />);
@@ -162,7 +161,7 @@ describe('BrowseLayout', () => {
     await waitFor(() => {
       const state = useFilterStore.getState();
       expect(state.gender).toBe('Both');
-      expect(state.macroCategories.size).toBe(0);
+      expect(state.rawCategories.size).toBe(0);
       expect(state.letter).toBe('Z');
     });
   });

@@ -22,7 +22,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: { direction: 'up', disabled: false, 'aria-label': 'Previous 11 names' },
+  args: { direction: 'up', disabled: false, 'aria-label': 'Previous page' },
 };
 
 const variants = [

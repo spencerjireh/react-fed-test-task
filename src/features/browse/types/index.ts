@@ -11,7 +11,6 @@ export interface RawName {
 export interface RawCategory {
   id: string;
   name: string;
-  description: string | null;
 }
 
 export type Letter = string;

@@ -6,6 +6,7 @@ import { renderApp, screen, userEvent, waitFor } from '@/testing/test-utils';
 
 import { useFilterStore } from '../../stores/filter-store';
 import type { RawCategory } from '../../types';
+import { getFullyCheckedMacros } from '../../utils/macro-category-map';
 import { CategoryChecklistStrip } from '../category-checklist-strip';
 
 // Shuffled order to exercise the in-component alpha sort.
@@ -14,9 +15,9 @@ const DISNEY_ID = '019c8a34-35f2-70b1-b866-69a4921d15a8';
 const LITERARY_ID = '019c8a34-360b-735c-88e7-5d86357a91a2';
 
 const FAMOUS_FIXTURE: RawCategory[] = [
-  { id: LITERARY_ID, name: 'Literary', description: null },
-  { id: CARTOON_ID, name: 'Cartoon', description: null },
-  { id: DISNEY_ID, name: 'Disney', description: null },
+  { id: LITERARY_ID, name: 'Literary' },
+  { id: CARTOON_ID, name: 'Cartoon' },
+  { id: DISNEY_ID, name: 'Disney' },
 ];
 
 describe('CategoryChecklistStrip', () => {
@@ -24,7 +25,6 @@ describe('CategoryChecklistStrip', () => {
     useFilterStore.setState({
       gender: 'Both',
       letter: null,
-      macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
     });
@@ -74,9 +74,11 @@ describe('CategoryChecklistStrip', () => {
     );
 
     await waitFor(() =>
-      expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(
-        true,
-      ),
+      expect(
+        getFullyCheckedMacros(useFilterStore.getState().rawCategories).has(
+          'Famous',
+        ),
+      ).toBe(true),
     );
   });
 

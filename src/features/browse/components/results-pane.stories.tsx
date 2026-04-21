@@ -20,7 +20,6 @@ const meta = {
     useFilterStore.setState({
       gender: 'M',
       letter: 'A',
-      macroCategories: new Set(),
       rawCategories: new Set(),
       selectedNameTitle: null,
     });

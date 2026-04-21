@@ -23,11 +23,11 @@ test.describe('Mobile bottom sheet', () => {
     ).toBeVisible();
 
     await expect(
-      page.getByRole('button', { name: /Previous 11 names/i }),
+      page.getByRole('button', { name: /Previous page/i }),
     ).toHaveCount(0);
-    await expect(
-      page.getByRole('button', { name: /Next 11 names/i }),
-    ).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Next page/i })).toHaveCount(
+      0,
+    );
 
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);

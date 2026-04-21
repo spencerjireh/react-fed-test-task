@@ -1,6 +1,8 @@
 import { act } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { MacroCategory } from '../../types';
+import { getFullyCheckedMacros } from '../../utils/macro-category-map';
 import {
   computeInitialState,
   serializeFilterStateToUrl,
@@ -9,6 +11,10 @@ import {
 
 function resetUrl(): void {
   window.history.replaceState({}, '', '/');
+}
+
+function fullyChecked(): Set<MacroCategory> {
+  return getFullyCheckedMacros(useFilterStore.getState().rawCategories);
 }
 
 beforeEach(() => {
@@ -43,7 +49,6 @@ describe('computeInitialState', () => {
     const state = computeInitialState();
     expect(state.gender).toBe('Both');
     expect(state.letter).toBeNull();
-    expect(state.macroCategories.size).toBe(0);
     expect(state.rawCategories.size).toBe(0);
     expect(state.selectedNameTitle).toBeNull();
   });
@@ -53,20 +58,17 @@ describe('computeInitialState', () => {
     const state = computeInitialState();
     expect(state.gender).toBe('F');
     expect(state.letter).toBe('C');
-    expect(state.macroCategories).toEqual(new Set(['Famous', 'Funny']));
   });
 
   it('drops invalid URL values (unknown gender, unknown macro)', () => {
     window.history.replaceState({}, '', '/?g=X&mc=Famous,NotAMacro,Joyful');
     const state = computeInitialState();
     expect(state.gender).toBe('Both');
-    expect(state.macroCategories).toEqual(new Set(['Famous', 'Joyful']));
   });
 
   it('expands a macro-only URL so hydration pulls in all of its child raws', () => {
     window.history.replaceState({}, '', '/?mc=Famous');
     const state = computeInitialState();
-    expect(state.macroCategories).toEqual(new Set(['Famous']));
     for (const id of FAMOUS_RAW_IDS)
       expect(state.rawCategories.has(id)).toBe(true);
   });
@@ -75,7 +77,6 @@ describe('computeInitialState', () => {
     const rc = FAMOUS_RAW_NAMES.join(',');
     window.history.replaceState({}, '', `/?rc=${rc}`);
     const state = computeInitialState();
-    expect(state.macroCategories.has('Famous')).toBe(true);
     for (const id of FAMOUS_RAW_IDS)
       expect(state.rawCategories.has(id)).toBe(true);
   });
@@ -98,22 +99,22 @@ describe('useFilterStore actions', () => {
   });
 
   it('toggleMacro produces a new Set reference each call', () => {
-    const before = useFilterStore.getState().macroCategories;
+    const before = useFilterStore.getState().rawCategories;
     act(() => useFilterStore.getState().toggleMacro('Famous'));
-    const after = useFilterStore.getState().macroCategories;
+    const after = useFilterStore.getState().rawCategories;
     expect(after).not.toBe(before);
-    expect(after.has('Famous')).toBe(true);
+    expect(fullyChecked().has('Famous')).toBe(true);
   });
 
   it('toggleMacro toggles on and off', () => {
     act(() => {
       useFilterStore.getState().toggleMacro('Famous');
     });
-    expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(true);
+    expect(fullyChecked().has('Famous')).toBe(true);
     act(() => {
       useFilterStore.getState().toggleMacro('Famous');
     });
-    expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(false);
+    expect(fullyChecked().has('Famous')).toBe(false);
   });
 
   it('toggleRaw produces a new Set and toggles membership', () => {
@@ -127,7 +128,6 @@ describe('useFilterStore actions', () => {
   it('toggleMacro from empty pulls every child raw into the store', () => {
     act(() => useFilterStore.getState().toggleMacro('Famous'));
     const s = useFilterStore.getState();
-    expect(s.macroCategories.has('Famous')).toBe(true);
     for (const id of FAMOUS_RAW_IDS) expect(s.rawCategories.has(id)).toBe(true);
     expect(s.rawCategories.size).toBe(FAMOUS_RAW_IDS.length);
   });
@@ -136,7 +136,6 @@ describe('useFilterStore actions', () => {
     act(() => useFilterStore.getState().toggleMacro('Famous'));
     act(() => useFilterStore.getState().toggleMacro('Famous'));
     const s = useFilterStore.getState();
-    expect(s.macroCategories.has('Famous')).toBe(false);
     for (const id of FAMOUS_RAW_IDS)
       expect(s.rawCategories.has(id)).toBe(false);
   });
@@ -146,31 +145,31 @@ describe('useFilterStore actions', () => {
       const toggle = useFilterStore.getState().toggleRaw;
       for (const id of FAMOUS_RAW_IDS) if (id !== CARTOON_ID) toggle(id);
     });
-    expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(false);
+    expect(fullyChecked().has('Famous')).toBe(false);
 
     act(() => useFilterStore.getState().toggleRaw(CARTOON_ID));
-    expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(true);
+    expect(fullyChecked().has('Famous')).toBe(true);
   });
 
   it('toggleRaw demotes the parent macro when any child flips off', () => {
     act(() => useFilterStore.getState().toggleMacro('Famous'));
-    expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(true);
+    expect(fullyChecked().has('Famous')).toBe(true);
 
     act(() => useFilterStore.getState().toggleRaw(DISNEY_ID));
     const s = useFilterStore.getState();
-    expect(s.macroCategories.has('Famous')).toBe(false);
+    expect(fullyChecked().has('Famous')).toBe(false);
     expect(s.rawCategories.has(DISNEY_ID)).toBe(false);
   });
 
   it('toggleRaw on Cartoon (Famous+Funny) can break Famous while Funny stays incomplete', () => {
     act(() => useFilterStore.getState().toggleMacro('Famous'));
-    expect(useFilterStore.getState().macroCategories.has('Famous')).toBe(true);
-    expect(useFilterStore.getState().macroCategories.has('Funny')).toBe(false);
+    expect(fullyChecked().has('Famous')).toBe(true);
+    expect(fullyChecked().has('Funny')).toBe(false);
 
     act(() => useFilterStore.getState().toggleRaw(CARTOON_ID));
     const s = useFilterStore.getState();
-    expect(s.macroCategories.has('Famous')).toBe(false);
-    expect(s.macroCategories.has('Funny')).toBe(false);
+    expect(fullyChecked().has('Famous')).toBe(false);
+    expect(fullyChecked().has('Funny')).toBe(false);
     expect(s.rawCategories.has(CARTOON_ID)).toBe(false);
   });
 
@@ -179,10 +178,10 @@ describe('useFilterStore actions', () => {
       useFilterStore.getState().toggleRaw(CARTOON_ID);
       useFilterStore.getState().toggleRaw(DISNEY_ID);
     });
-    expect(useFilterStore.getState().macroCategories.has('Funny')).toBe(false);
+    expect(fullyChecked().has('Funny')).toBe(false);
 
     act(() => useFilterStore.getState().toggleRaw(UNUSUAL_ID));
-    expect(useFilterStore.getState().macroCategories.has('Funny')).toBe(true);
+    expect(fullyChecked().has('Funny')).toBe(true);
   });
 
   it('goToResults writes gender=M and letter=A in a single subscribe tick', () => {
@@ -213,7 +212,6 @@ describe('useFilterStore actions', () => {
     const s = useFilterStore.getState();
     expect(s.gender).toBe('Both');
     expect(s.letter).toBeNull();
-    expect(s.macroCategories.size).toBe(0);
     expect(s.rawCategories.size).toBe(0);
     expect(s.selectedNameTitle).toBeNull();
   });
@@ -256,7 +254,9 @@ describe('serializeFilterStateToUrl', () => {
     const hydrated = computeInitialState();
     expect(hydrated.gender).toBe('F');
     expect(hydrated.letter).toBe('C');
-    expect(hydrated.macroCategories).toEqual(new Set(['Famous', 'Funny']));
+    expect(getFullyCheckedMacros(hydrated.rawCategories)).toEqual(
+      new Set(['Famous', 'Funny']),
+    );
   });
 
   it('omits Both so the default state produces a clean URL', () => {

@@ -3,7 +3,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { useFilterStore } from '../../stores/filter-store';
 import type { Name } from '../../types';
+import { getRawIdsForMacro } from '../../utils/macro-category-map';
 import { useFilteredNames } from '../use-filtered-names';
+
+const FUNNY_RAW_IDS = getRawIdsForMacro('Funny');
+const ANY_FUNNY_ID = FUNNY_RAW_IDS[0];
 
 function buildName(
   id: string,
@@ -30,12 +34,12 @@ const andromeda = buildName('a', 'Andromeda', {
 });
 const bandit = buildName('b', 'Bandit', {
   gender: ['M'],
-  categories: ['funny'],
+  categories: [ANY_FUNNY_ID],
   macroCategories: ['Funny'],
 });
 const coco = buildName('c', 'Coco', {
   gender: ['F'],
-  categories: ['funny'],
+  categories: [ANY_FUNNY_ID],
   macroCategories: ['Funny'],
 });
 
@@ -80,23 +84,5 @@ describe('useFilteredNames', () => {
     act(() => useFilterStore.getState().setLetter('A'));
     expect(result.current).not.toBe(first);
     expect(result.current.map((n) => n.id)).toEqual(['a']);
-  });
-
-  it('keeps a name hitting only the macro set when rawCategories is also non-empty', () => {
-    const { result } = renderHook(() => useFilteredNames(names));
-
-    act(() => useFilterStore.getState().toggleMacro('International'));
-    act(() => useFilterStore.getState().toggleRaw('funny'));
-
-    expect(result.current.map((n) => n.id).sort()).toEqual(['a', 'b', 'c']);
-  });
-
-  it('keeps a name hitting only the raw set when macroCategories is also non-empty', () => {
-    const { result } = renderHook(() => useFilteredNames(names));
-
-    act(() => useFilterStore.getState().toggleMacro('Funny'));
-    act(() => useFilterStore.getState().toggleRaw('greek'));
-
-    expect(result.current.map((n) => n.id).sort()).toEqual(['a', 'b', 'c']);
   });
 });

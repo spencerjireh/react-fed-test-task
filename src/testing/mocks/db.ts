@@ -1,4 +1,4 @@
-import { factory, nullable, primaryKey } from '@mswjs/data';
+import { factory, primaryKey } from '@mswjs/data';
 
 import categoriesJson from './data/categories.json';
 import lettersJson from './data/letters.json';
@@ -15,7 +15,6 @@ const models = {
   category: {
     id: primaryKey(String),
     name: String,
-    description: nullable(String),
   },
   letter: {
     value: primaryKey(String),

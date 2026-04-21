@@ -63,6 +63,7 @@ export function LetterStrip() {
     }
   };
 
+  // FilterBar reads this data-filter-chrome marker so letter clicks don't close an open category dropdown.
   return (
     <div
       role="tablist"

@@ -54,9 +54,9 @@ const FIXTURE: RawName[] = [
 ];
 
 const CATEGORIES_FIXTURE: RawCategory[] = [
-  { id: CARTOON_ID, name: 'Cartoon', description: null },
-  { id: CELEBRITIES_ID, name: 'Celebrities', description: null },
-  { id: DISNEY_ID, name: 'Disney', description: null },
+  { id: CARTOON_ID, name: 'Cartoon' },
+  { id: CELEBRITIES_ID, name: 'Celebrities' },
+  { id: DISNEY_ID, name: 'Disney' },
 ];
 
 function seedHandlers(names: RawName[] = FIXTURE) {
